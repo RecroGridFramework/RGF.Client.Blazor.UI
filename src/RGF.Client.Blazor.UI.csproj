@@ -38,11 +38,11 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)'=='Release'" >
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
     <PackageReference Include="Recrovit.RecroGridFramework.Client.Blazor" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)'=='Debug'" >
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
     <ProjectReference Include="..\..\RGF.Client.Blazor\src\RGF.Client.Blazor.csproj" />
   </ItemGroup>
 
