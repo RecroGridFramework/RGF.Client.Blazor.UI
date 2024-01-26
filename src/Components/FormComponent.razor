@@ -12,7 +12,10 @@
                         {
                             var tab = RgfForm.FormData.FormTabs[idx];
                             <li class="nav-item" role="presentation">
-                                <button class="@($"nav-link{(idx == ActiveTabIndex ? " active" : "")}")" id="@($"{_tabsId}-tab-{tab.Index}")" data-bs-toggle="tab" data-bs-target="@($"#{_tabsId}-tab-{tab.Index}-pane")" type="button" role="tab">
+                                <button class="@($"nav-link{(idx == ActiveTabIndex ? " active" : "")}")"
+                                        id="@($"{_tabsId}-tab-{tab.Index}")"
+                                        data-bs-toggle="tab" data-bs-target="@($"#{_tabsId}-tab-{tab.Index}-pane")" type="button" role="tab"
+                                        @onclick="() => ActivateTab(tab.Index - 1)">
                                     @tab.Title
                                 </button>
                             </li>
@@ -24,7 +27,7 @@
                         @for (var idx = 0; idx < RgfForm.FormData.FormTabs.Count; idx++)
                         {
                             var tab = RgfForm.FormData.FormTabs[idx];
-                            <div class="@($"tab-pane fade show{(idx == ActiveTabIndex ? " active" : "")}")" id="@($"{_tabsId}-tab-{tab.Index}-pane")" role="tabpanel" tabindex="@idx">
+                            <div class="@($"tab-pane fade show{(idx == ActiveTabIndex ? " active" : "")}")" id="@($"{_tabsId}-tab-{tab.Index}-pane")" role="tabpanel" tabindex="0">
                                 @foreach (var group in tab.Groups)
                                 {
                                     if (!string.IsNullOrEmpty(group.Title))
@@ -60,7 +63,6 @@
 
 @inject IJSRuntime _jsRuntime
 @code {
-
     [Parameter, EditorRequired]
     public RgfEntityParameters EntityParameters { get; set; } = null!;
 
@@ -71,6 +73,7 @@
     private RgfFormComponent _rgfFormRef { get; set; } = null!;
     private string _tabsId = RgfBaseComponent.GetNextId();
     public int ActiveTabIndex { get; private set; } = 0;
+    public HashSet<int> PreviouslyActiveTabs { get; private set; } = new() { 0 };
 
     protected override void OnInitialized()
     {
@@ -95,4 +98,10 @@
     }
         @param.BaseFormComponent.GetFormItemTemplate(param)
     </div>;
+
+    private void ActivateTab(int index)
+    {
+        ActiveTabIndex = index;
+        PreviouslyActiveTabs.Add(index);
+    }
 }
