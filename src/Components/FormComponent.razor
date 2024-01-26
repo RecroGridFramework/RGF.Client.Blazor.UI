@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 
-<RgfFormComponent @ref="_rgfFormRef" EntityParameters="EntityParameters"
+<RgfFormComponent @ref="_rgfFormRef" EntityParameters="EntityParameters" FormComponent="this"
                   FormGroupLayoutTemplate="FormGroupLayoutTemplate"
                   FormItemLayoutTemplate="FormItemLayoutTemplate">
     <FormTemplate Context="RgfForm">
@@ -56,7 +56,6 @@
             </div>
         </div>
     </FormValidationTemplate>
-
 </RgfFormComponent>
 
 @inject IJSRuntime _jsRuntime
