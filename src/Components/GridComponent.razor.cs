@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using Recrovit.RecroGridFramework.Abstraction.Infrastructure.Events;
+using Recrovit.RecroGridFramework.Abstraction.Contracts.Services;
 using Recrovit.RecroGridFramework.Abstraction.Models;
 using Recrovit.RecroGridFramework.Client.Blazor.Components;
+using Recrovit.RecroGridFramework.Client.Blazor.Events;
 using Recrovit.RecroGridFramework.Client.Handlers;
 
 namespace Recrovit.RecroGridFramework.Client.Blazor.UI.Components;
@@ -35,7 +36,7 @@ public partial class GridComponent : ComponentBase, IDisposable
     {
         base.OnInitialized();
         _selfRef = DotNetObjectReference.Create(this);
-        GridParameters.Events.CreateAttributes.Subscribe(OnCreateAttributes);
+        GridParameters.EventDispatcher.Subscribe(RgfGridEventKind.CreateAttributes, OnCreateAttributes);
     }
 
     public void Dispose()
@@ -68,11 +69,12 @@ public partial class GridComponent : ComponentBase, IDisposable
         await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.deselectAllRow", _tableRef);
     }
 
-    protected virtual Task OnCreateAttributes(DataEventArgs<RgfDynamicDictionary> rowData)
+    protected virtual Task OnCreateAttributes(IRgfEventArgs<RgfGridEventArgs> arg)
     {
+        var rowData = arg.Args.RowData ?? throw new ArgumentException();
         foreach (var prop in EntityDesc.SortedVisibleColumns)
         {
-            var attr = rowData.Value["__attributes"] as RgfDynamicDictionary;
+            var attr = rowData["__attributes"] as RgfDynamicDictionary;
             if (attr != null)
             {
                 string? propAttr = null;
