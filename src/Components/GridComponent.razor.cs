@@ -32,6 +32,8 @@ public partial class GridComponent : ComponentBase, IDisposable
 
     private DotNetObjectReference<GridComponent>? _selfRef;
 
+    private List<IDisposable> _disposables { get; set; } = new();
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -46,6 +48,11 @@ public partial class GridComponent : ComponentBase, IDisposable
             _selfRef.Dispose();
             _selfRef = null;
         }
+        if (_disposables != null)
+        {
+            _disposables.ForEach(disposable => disposable.Dispose());
+            _disposables = null!;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -53,7 +60,7 @@ public partial class GridComponent : ComponentBase, IDisposable
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            _rgfGridRef.Disposables.Add(Manager.ListHandler.GridData.OnAfterChange(this, OnChangedGridData));
+            _disposables.Add(_rgfGridRef.GridDataSource.OnAfterChange(this, OnChangedGridData));
         }
         await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.initializeTable", _selfRef, _tableRef);
     }
