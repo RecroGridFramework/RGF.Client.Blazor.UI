@@ -81,35 +81,33 @@ public partial class GridComponent : ComponentBase, IDisposable
         var rowData = arg.Args.RowData ?? throw new ArgumentException();
         foreach (var prop in EntityDesc.SortedVisibleColumns)
         {
-            var attr = rowData["__attributes"] as RgfDynamicDictionary;
-            if (attr != null)
+            string? propClass = null;
+            if (prop.FormType == PropertyFormType.CheckBox)
             {
-                string? propAttr = null;
-                if (prop.FormType == PropertyFormType.CheckBox)
+                propClass = "rg-center";
+            }
+            else
+            {
+                switch (prop.ListType)
                 {
-                    propAttr = " rg-center";
-                }
-                else
-                {
-                    switch (prop.ListType)
-                    {
-                        case PropertyListType.Numeric:
-                            propAttr = " rg-numeric";
-                            break;
+                    case PropertyListType.Numeric:
+                        propClass = "rg-numeric";
+                        break;
 
-                        case PropertyListType.String:
-                            propAttr = " rg-string";
-                            break;
+                    case PropertyListType.String:
+                        propClass = "rg-string";
+                        break;
 
-                        case PropertyListType.Image:
-                            propAttr = " rg-html";
-                            break;
-                    }
+                    case PropertyListType.Image:
+                        propClass = "rg-html";
+                        break;
                 }
-                if (propAttr != null)
-                {
-                    attr[$"class-{prop.Alias}"] += propAttr;
-                }
+            }
+            if (propClass != null)
+            {
+                var attributes = rowData.GetOrNew<RgfDynamicDictionary>("__attributes");
+                var propAttributes = attributes.GetOrNew<RgfDynamicDictionary>(prop.Alias);
+                propAttributes.Set<string>("class", (old) => string.IsNullOrEmpty(old) ? propClass : $"{old.Trim()} {propClass}");
             }
         }
         return Task.CompletedTask;
