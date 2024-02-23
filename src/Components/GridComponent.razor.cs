@@ -38,7 +38,7 @@ public partial class GridComponent : ComponentBase, IDisposable
     {
         base.OnInitialized();
         _selfRef = DotNetObjectReference.Create(this);
-        GridParameters.EventDispatcher.Subscribe(RgfGridEventKind.CreateAttributes, OnCreateAttributes);
+        GridParameters.EventDispatcher.Subscribe(RgfGridEventKind.CreateRowData, OnCreateAttributes);
     }
 
     public void Dispose()
