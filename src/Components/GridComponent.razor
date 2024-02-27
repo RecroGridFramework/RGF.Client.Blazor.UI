@@ -33,7 +33,7 @@
                     {
                         int currIdx = index++;
                         var attributes = rowData.Get<RgfDynamicDictionary>("__attributes");
-                        <tr @ref="_rowRef[currIdx]" class="@(attributes?.Get<string>("class"))" style="@(attributes?.Get<string>("style"))" @onclick="(arg) => OnRowClick(arg, rowData, currIdx)" @ondblclick="(arg) => OnRowDoubleClick(arg, rowData, currIdx)">
+                        <tr @ref="_rowRef[currIdx]" class="@(attributes?.Get<string>("class"))" style="@(attributes?.Get<string>("style"))" @onclick="(arg) => OnRowClick(arg, rowData, currIdx)">
                             @foreach (var prop in EntityDesc.SortedVisibleColumns)
                             {
                                 var propAttributes = attributes?.Get<RgfDynamicDictionary>(prop.Alias);
