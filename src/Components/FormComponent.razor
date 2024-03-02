@@ -89,8 +89,10 @@
         if (rowIndex != -1)
         {
             var buttons = new List<ButtonParameters>() {
-                new("bi-chevron-left", RecroDict.GetRgfUiString("Prev"), (arg) => _rgfFormRef.PrevFormItemAsync(), "btn-secondary") { Disabled = rowIndex <= 0 },
-                new("bi-chevron-right", RecroDict.GetRgfUiString("Next"), (arg) => _rgfFormRef.NextFormItemAsync(), "btn-secondary") { Disabled = rowIndex + 1 >= Manager.ItemCount.Value } };
+                new("bi-chevron-double-left", RecroDict.GetRgfUiString("First"), async (arg) => await _rgfFormRef.FirstFormItemAsync(), "btn-secondary") { Disabled = rowIndex <= 0 },
+                new("bi-chevron-left", RecroDict.GetRgfUiString("Prev"), async (arg) => await _rgfFormRef.PrevFormItemAsync(), "btn-secondary") { Disabled = rowIndex <= 0 },
+                new("bi-chevron-right", RecroDict.GetRgfUiString("Next"), async (arg) => await _rgfFormRef.NextFormItemAsync(), "btn-secondary") { Disabled = rowIndex + 1 >= Manager.ItemCount.Value },
+                new("bi-chevron-double-right", RecroDict.GetRgfUiString("Last"), async (arg) => await _rgfFormRef.LastFormItemAsync(), "btn-secondary") { Disabled = rowIndex + 1 >= Manager.ItemCount.Value } };
             FormParameters.DialogParameters.LeftButtons = buttons;
         }
         else
