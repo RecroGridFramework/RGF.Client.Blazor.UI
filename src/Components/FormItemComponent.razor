@@ -17,7 +17,7 @@
                         <RgfInputText @bind-Value="ItemData.StringValue"
                                       Readonly="Property.Readonly" Disabled="Property.Disabled"
                                       CssClass="@RgfFormItem.CssClass" Id="@Id" />
-                        <RgfButton IconName="bi-search" CssClass="button.IsPrimary" OnClick="() => RgfFormItem.OnSearchEntity(ItemData.StringValue)" />
+                        <RgfButton IconName="bi-search" CssClass="button.IsPrimary" OnClick="async () => await RgfFormItem.FindEntityAsync(ItemData.StringValue)" />
                     </div>
                 }
                 else
