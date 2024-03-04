@@ -39,6 +39,17 @@ public partial class GridComponent : ComponentBase, IDisposable
         GridParameters.EventDispatcher.Subscribe(RgfListEventKind.CreateRowData, OnCreateAttributes);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            _disposables.Add(_rgfGridRef.GridDataSource.OnAfterChange(this, OnChangedGridData));
+            _rgfGridRef.EntityParameters.ToolbarParameters.EventDispatcher.Subscribe([RgfToolbarEventKind.Read, RgfToolbarEventKind.Edit], OnSetFormItem);
+        }
+        await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.initializeTable", _selfRef, _tableRef);
+    }
+
     public void Dispose()
     {
         if (_selfRef != null)
@@ -51,17 +62,7 @@ public partial class GridComponent : ComponentBase, IDisposable
             _disposables.ForEach(disposable => disposable.Dispose());
             _disposables = null!;
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender)
-        {
-            _disposables.Add(_rgfGridRef.GridDataSource.OnAfterChange(this, OnChangedGridData));
-            _disposables.Add(Manager.NotificationManager.Subscribe<RgfToolbarEventArgs>(this, OnToolbarCommandAsync));
-        }
-        await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.initializeTable", _selfRef, _tableRef);
+        _rgfGridRef.EntityParameters.ToolbarParameters.EventDispatcher.Unsubscribe([RgfToolbarEventKind.Read, RgfToolbarEventKind.Edit], OnSetFormItem);
     }
 
     [JSInvokable]
@@ -181,20 +182,14 @@ public partial class GridComponent : ComponentBase, IDisposable
         }
     }
 
-    private async Task OnToolbarCommandAsync(IRgfEventArgs<RgfToolbarEventArgs> arg)
+    private async Task OnSetFormItem(IRgfEventArgs<RgfToolbarEventArgs> arg)
     {
-        switch (arg.Args.Command)
+        var data = _rgfGridRef.SelectedItems.Single();
+        int rowIndex = Manager.ListHandler.GetRelativeRowIndex(data);
+        if (rowIndex != -1)
         {
-            case ToolbarAction.Edit:
-            case ToolbarAction.Read:
-                var data = _rgfGridRef.SelectedItems.Single();
-                int rowIndex = Manager.ListHandler.GetRelativeRowIndex(data);
-                if (rowIndex != -1)
-                {
-                    await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.deselectAllRow", _tableRef);
-                    await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.selectRow", _rowRef[rowIndex], rowIndex);
-                }
-                break;
+            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.deselectAllRow", _tableRef);
+            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.selectRow", _rowRef[rowIndex], rowIndex);
         }
     }
 }
