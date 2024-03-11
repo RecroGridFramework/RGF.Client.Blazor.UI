@@ -1,5 +1,4 @@
-﻿
-<RgfFilterComponent @ref="_rgfFilterRef" EntityParameters="EntityParameters">
+﻿<RgfFilterComponent @ref="_rgfFilterRef" EntityParameters="EntityParameters">
     <FilterTemplate Context="RgfFilterComp">
         <FilterConditionComponent FilterComponent="RgfFilterComp" Condition="RgfFilterComp.Condition" />
     </FilterTemplate>
@@ -47,6 +46,7 @@
     </FooterTemplate>
 </RgfFilterComponent>
 
+@inject IRecroDictService RecroDict
 @code {
 
     [Parameter, EditorRequired]
@@ -54,7 +54,6 @@
 
     private IRgManager Manager => EntityParameters.Manager!;
     private RgfFilterParameters FilterParameters { get => EntityParameters.FilterParameters; }
-    private IRecroDictService RecroDict => Manager.RecroDict;
 
     private RgfFilterComponent _rgfFilterRef { get; set; } = null!;
 
