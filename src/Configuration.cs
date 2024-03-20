@@ -26,7 +26,13 @@ public class RGFClientBlazorUIConfiguration
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{ApiService.BaseAddress}/rgf/resource/bootstrap-submenu.css", false, BootstrapSubmenuCssId);
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.RemoveLinkedFile", "css/bootstrap/bootstrap.min.css", "stylesheet");
 
-        await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/scripts/recrovit-rgf-blazor-ui.js");
+        await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/scripts/" +
+#if DEBUG
+            "recrovit-rgf-blazor-ui.js"
+#else
+            "recrovit-rgf-blazor-ui.min.js"
+#endif
+            );
         await jsRuntime.InvokeVoidAsync("eval", $"document.getElementsByTagName('html')[0].setAttribute('data-bs-theme', '{themeName}');");
     }
 

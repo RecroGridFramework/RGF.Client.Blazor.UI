@@ -53,10 +53,14 @@
   <ItemGroup>
     <None Include="..\.gitignore" />
     <None Include="..\README.*" Pack="true" PackagePath="\" />
+    <Content Remove="bundleconfig.json" />
     <Content Remove="libman.json" />
-    <None Include="libman.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    <None Include="bundleconfig.json" />
+    <None Include="libman.json" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
+    <Content Update="wwwroot\scripts\recrovit-rgf-blazor-ui.js" CopyToPublishDirectory="Never"/>
   </ItemGroup>
 
 </Project>
