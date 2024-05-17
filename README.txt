@@ -2,7 +2,7 @@
 ------------ RecroGrid Framework - Client Blazor UI ------------
 -------------------------------------------------
 
-Documentation: https://RecroGrid.com/docs
+https://RecroGridFramework.com
 
 Quickstart:
 -------------------------------------------------------------------------
