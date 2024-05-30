@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.0.2
+* recrovit-rgf-blazor-ui.js v1.0.3
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -71,7 +71,7 @@ Blazor.UI = {
         initializeTable: function (gridRef, table) {
             var rgfTable = new Recrovit.WebCli.RgfTable(table);
             rgfTable.makeColumnsResizable(function (idx, target, width) {
-                gridRef.invokeMethodAsync('SetColumnWidth', idx + 1, parseInt(width));
+                gridRef.invokeMethodAsync('SetColumnWidth', idx + 1, parseInt(width) || 0);
             });
             rgfTable.makeColumnsDragable(function (idx, newIdx) {
                 if (idx != newIdx && idx + 1 != newIdx) {
