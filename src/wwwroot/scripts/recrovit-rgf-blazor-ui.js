@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.0.3
+* recrovit-rgf-blazor-ui.js v1.0.4
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -45,9 +45,9 @@ Blazor.UI = {
         },
         loadDialogPos: function (name, dialogId) {
             const data = localStorage.getItem(`RGF.DialogPos.${name}`);
+            var content = $('div.modal-content:first', '#' + dialogId);
             if (data != undefined) {
                 const dialogPos = JSON.parse(data);
-                var content = $('div.modal-content:first', '#' + dialogId);
                 content.css({
                     width: `${dialogPos[0]}px`,
                     height: `${dialogPos[1]}px`,
@@ -57,6 +57,9 @@ Blazor.UI = {
                     left: `${dialogPos[3]}px`,
                     margin: '0'
                 });
+            }
+            else {
+                content.css('width', '80%');
             }
         }
     },
