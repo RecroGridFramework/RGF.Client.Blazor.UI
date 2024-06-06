@@ -59,7 +59,7 @@ Blazor.UI = {
                 });
             }
             else {
-                content.css('width', '80%');
+                content.css('width', '60%');
             }
         }
     },
