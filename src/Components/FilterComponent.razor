@@ -5,7 +5,7 @@
     <FooterTemplate Context="RgfFilterComp">
         <div class="d-flex flex-row justify-content-start align-items-center">
             <div class="p-1">
-                <label class="col-form-label">Query timeout</label>
+                <label class="col-form-label text-nowrap">Query timeout</label>
             </div>
             <div class="p-1">
                 <RgfInputNumber TValue="int?" @bind-Value="RgfFilterComp.PredefinedFilter.QueryTimeout" HideSpinButton="true" Width="3rem" Min="0" />
@@ -16,7 +16,7 @@
                              Items="RgfFilterComp.FilterHandler.PredefinedFilters.Select(e=> e.Name)"
                              OnValueChanging="OnValueChanging" />
             </div>
-            <div class="p-1">
+            <div class="p-1 checkbox-lg">
                 <RgfCheckBox @bind-Value=RgfFilterComp.PredefinedFilter.IsGlobal Disabled="!RgfFilterComp.IsPredefinedFilterAdmin" Label="@RecroDict.GetRgfUiString("Public")" Reverse="true" />
             </div>
             <div class="p-1">
