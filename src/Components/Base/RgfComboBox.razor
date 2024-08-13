@@ -68,6 +68,7 @@ else
 
 @typeparam TValue
 @inherits RgfInput<TValue>
+@implements IAsyncDisposable
 @inject IJSRuntime _jsRuntime
 @code {
     [Parameter]
@@ -171,6 +172,14 @@ else
             {
                 await _jsRuntime.InvokeVoidAsync("eval", $"$('#{this.Id}').resizable();");
             }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (this.Resizable)
+        {
+            await _jsRuntime.InvokeVoidAsync("eval", $"$('#{this.Id}').resizable('destroy');");
         }
     }
 }

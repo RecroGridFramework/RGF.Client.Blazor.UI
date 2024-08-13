@@ -5,7 +5,7 @@
         <li>
             <div class="d-flex flex-row align-items-center">
                 <div class="p-1">
-                    <RgfComboBox TValue="RgfFilter.LogicalOperator" @bind-Value="item.LogicalOperator" Disabled="idx == 0" DataSource="LogicalOperators" />
+                    <RgfComboBox TValue="RgfFilter.LogicalOperator" @bind-Value="item.LogicalOperator" Disabled="idx == 0" DataSource="LogicalOperators" Width="fit-content" />
                 </div>
                 <div class="p-1">
                     <RgfButton IconName="bi-trash" CssClass="btn-outline-secondary p-1" OnClick="() => OnRemoveCondition(item)" />
