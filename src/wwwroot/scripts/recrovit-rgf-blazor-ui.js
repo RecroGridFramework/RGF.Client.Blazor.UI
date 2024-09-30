@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.1.0
+* recrovit-rgf-blazor-ui.js v1.2.0
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -112,6 +112,40 @@ Blazor.UI = {
                     $(this).css({ width: '', height: '' });
                 }
             });
+        }
+    },
+    ComboBox: {
+        initialize: function (dotNetRef, comboBoxId, value, width) {
+            var combo = $(`#${comboBoxId}`).rgcombobox({
+                value: value,
+                inputClass: 'rgf-combobox-edit form-control form-control-sm',
+                button: '<button class="rgf-combobox-button btn btn-outline-secondary" type="button" rg-combobox=""><i class="bi bi-caret-down-fill"></i></button>',
+                noWrapper: true,
+                calcWidth: false,
+                width: width
+            });
+            combo.rgcombobox('instance').input.autocomplete('widget').css('z-index', 5000);
+            combo.on('change.RGF-Client-Blazor-UI', function (event) {
+                var $this = $(this);
+                if (event.originalEvent?.type == 'keyup' && event.originalEvent?.key == "Enter") {
+                    var text = $this.rgcombobox("instance").input.val();
+                    dotNetRef.invokeMethodAsync('OnEnter', text);
+                }
+                else {
+                    var selected = $this.find(":selected");
+                    if (selected.length == 1) {
+                        var value = selected.val();
+                        dotNetRef.invokeMethodAsync('OnSelected', value);
+                    }
+                    else {
+                        var text = $this.rgcombobox("instance").input.val();
+                        dotNetRef.invokeMethodAsync('OnChanged', text);
+                    }
+                }
+            });
+        },
+        destroy: function (comboBoxId) {
+            $(`#${comboBoxId}`).off('change.RGF-Client-Blazor-UI').rgcombobox("destroy");
         }
     }
 };
