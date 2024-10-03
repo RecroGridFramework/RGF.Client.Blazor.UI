@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.2.0
+* recrovit-rgf-blazor-ui.js v1.2.1
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -143,6 +143,9 @@ Blazor.UI = {
                     }
                 }
             });
+        },
+        setText: function (comboBoxId, text) {
+            $(`#${comboBoxId}`).rgcombobox("instance").input.val(text);
         },
         destroy: function (comboBoxId) {
             $(`#${comboBoxId}`).off('change.RGF-Client-Blazor-UI').rgcombobox("destroy");
