@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.2.1
+* recrovit-rgf-blazor-ui.js v1.3.0
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -89,6 +89,32 @@ Blazor.UI = {
                     gridRef.invokeMethodAsync('SetColumnPos', idx, newIdx > idx ? newIdx - 1 : newIdx);
                 }
             });
+            BlazorGrids.initializeTooltips(gridRef);
+        },
+        initializeTooltips: function (gridRef) {
+            var tooltipTriggerArr = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerArr.forEach(function (element) {
+                var tooltip = new bootstrap.Tooltip(element, {
+                    title: element.innerText,
+                    customClass: 'rgf-cell-tooltip',
+                    trigger: 'hover',
+                    delay: { show: 500 },
+                    html: true
+                });
+                element.addEventListener('show.bs.tooltip', async function () {
+                    if (tooltip.tooltipText == null)
+                    {
+                        var col = $(this).attr('data-cell');
+                        var rowIdx = $(this).parent('tr').attr('data-row');
+                        tooltip.tooltipText = await gridRef.invokeMethodAsync('GetTooltipText', parseInt(rowIdx), parseInt(col));
+                        if (tooltip.tooltipText == null) {
+                            tooltip.tooltipText = this.innerText;
+                        }
+                        tooltip.setContent({ '.tooltip-inner': tooltip.tooltipText })
+                    }
+                    setTimeout(function () { tooltip.hide(); }, 8000);
+                });
+            });
         }
     },
     ListBox: {
@@ -152,3 +178,5 @@ Blazor.UI = {
         }
     }
 };
+
+const BlazorGrids = Blazor.UI.Grid;
