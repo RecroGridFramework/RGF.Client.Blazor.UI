@@ -78,27 +78,30 @@
                         </div>
                     }
                 </div>
-                <div class="btn-group rg-grid-settings flex-grow-1" role="group" style="max-width:531px;">
-                    <div class="rg-predef-name input-group input-group-sm">
-                        <RgfComboBox TValue="int?" Value="@RgfToolbar.GridSetting.GridSettingsId" Text="@RgfToolbar.GridSetting.SettingsName" AllowCustom="true"
-                                     DataSource="RgfToolbar.GridSettingList.Select(e => new KeyValuePair<int?, string>(e.GridSettingsId, e.SettingsName))"
-                                     InputChanged="OnGridSettingsChanged" />
-                    </div>
-                    <div class="rg-predef-save">
-                        <div class="ps-1 pe-1">
-                            <RgfCheckBox Label="@RecroDict.GetRgfUiString("Public")" Reverse="true" WrapperCssClass="d-flex flex-row-reverse align-items-center"
-                                         @bind-Value="RgfToolbar.GridSetting.IsPublicNonNullable" Disabled="!RgfToolbar.IsPublicGridSettingAllowed || string.IsNullOrEmpty(RgfToolbar.GridSetting.SettingsName)" />
+                @if (Manager.EntityDesc.Options.GetBoolValue("RGO_ClientMode") != true)
+                {
+                    <div class="btn-group rg-grid-settings flex-grow-1" role="group" style="max-width:531px;">
+                        <div class="rg-predef-name input-group input-group-sm">
+                            <RgfComboBox TValue="int?" Value="@RgfToolbar.GridSetting.GridSettingsId" Text="@RgfToolbar.GridSetting.SettingsName" AllowCustom="true"
+                                         DataSource="RgfToolbar.GridSettingList.Select(e => new KeyValuePair<int?, string>(e.GridSettingsId, e.SettingsName))"
+                                         InputChanged="OnGridSettingsChanged" />
                         </div>
-                        <div class="">
-                            <RgfButton IconName="bi-floppy" CssClass="btn-outline-secondary" Title="@RecroDict.GetRgfUiString("Save")"
-                                       Disabled="string.IsNullOrEmpty(RgfToolbar.GridSetting.SettingsName) || !RgfToolbar.IsPublicGridSettingAllowed && RgfToolbar.GridSetting.IsPublicNonNullable"
-                                       OnClick="() => RgfToolbar.OnSaveGridSettingsAsync()" />
-                            <RgfButton IconName="bi-trash" CssClass="btn-outline-secondary" Title="@RecroDict.GetRgfUiString("Delete")"
-                                       Disabled="RgfToolbar.GridSetting.GridSettingsId == null || !RgfToolbar.IsPublicGridSettingAllowed && RgfToolbar.GridSetting.IsPublicNonNullable"
-                                       OnClick="() => RgfToolbar.OnDeleteGridSettingsAsync()" />
+                        <div class="rg-predef-save">
+                            <div class="ps-1 pe-1">
+                                <RgfCheckBox Label="@RecroDict.GetRgfUiString("Public")" Reverse="true" WrapperCssClass="d-flex flex-row-reverse align-items-center"
+                                             @bind-Value="RgfToolbar.GridSetting.IsPublicNonNullable" Disabled="!RgfToolbar.IsPublicGridSettingAllowed || string.IsNullOrEmpty(RgfToolbar.GridSetting.SettingsName)" />
+                            </div>
+                            <div class="">
+                                <RgfButton IconName="bi-floppy" CssClass="btn-outline-secondary" Title="@RecroDict.GetRgfUiString("Save")"
+                                           Disabled="string.IsNullOrEmpty(RgfToolbar.GridSetting.SettingsName) || !RgfToolbar.IsPublicGridSettingAllowed && RgfToolbar.GridSetting.IsPublicNonNullable"
+                                           OnClick="() => RgfToolbar.OnSaveGridSettingsAsync()" />
+                                <RgfButton IconName="bi-trash" CssClass="btn-outline-secondary" Title="@RecroDict.GetRgfUiString("Delete")"
+                                           Disabled="RgfToolbar.GridSetting.GridSettingsId == null || !RgfToolbar.IsPublicGridSettingAllowed && RgfToolbar.GridSetting.IsPublicNonNullable"
+                                           OnClick="() => RgfToolbar.OnDeleteGridSettingsAsync()" />
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </ToolbarTemplate>
