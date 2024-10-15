@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using Recrovit.RecroGridFramework.Abstraction.Contracts.Services;
 using Recrovit.RecroGridFramework.Client.Blazor.UI.Components;
 using Recrovit.RecroGridFramework.Client.Services;
 using System.Reflection;
@@ -9,16 +10,23 @@ namespace Recrovit.RecroGridFramework.Client.Blazor.UI;
 
 public class RGFClientBlazorUIConfiguration
 {
-    public static async Task LoadResourcesAsync(IJSRuntime jsRuntime, string themeName)
+    public static async Task LoadResourcesAsync(IServiceProvider serviceProvider, string themeName)
     {
+        var jsRuntime = serviceProvider.GetRequiredService<IJSRuntime>();
         //await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{ApiService.BaseAddress}/rgf/resource/lib%2Fjqueryui%2Fjquery-ui.min.js");
         //await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{ApiService.BaseAddress}/_content/recrogrid/lib/jqueryui/themes/base/jquery-ui.min.css", false, JqueryUiCssId);
         var bname = typeof(RgfBlazorConfiguration).Assembly.GetName().Name;
-        await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{bname}/lib/jqueryui/jquery-ui.min.js");
-        await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{RgfClientConfiguration.AppRootPath}_content/{bname}/lib/jqueryui/themes/base/jquery-ui.min.css", false, JqueryUiCssId);
-
+        var jquiVer = await RgfBlazorConfiguration.ChkJQueryUiVer(jsRuntime);
+        if (jquiVer < 0)
+        {
+            await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{bname}/lib/jqueryui/jquery-ui.min.js");
+            await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{RgfClientConfiguration.AppRootPath}_content/{bname}/lib/jqueryui/themes/base/jquery-ui.min.css", false, JqueryUiCssId);
+        }
         var libName = Assembly.GetExecutingAssembly().GetName().Name;
-        await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/lib/bootstrap/dist/js/bootstrap.bundle.min.js");
+        if (!_scriptsLoaded)
+        {
+            await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/lib/bootstrap/dist/js/bootstrap.bundle.min.js");
+        }
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/lib/bootstrap/dist/css/bootstrap.min.css", false, BootstrapCssId);
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/lib/bootstrap-icons/font/bootstrap-icons.min.css", false, BootstrapIconsId);
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/css/styles.css", false, BlazorUICss);
@@ -27,13 +35,29 @@ public class RGFClientBlazorUIConfiguration
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.AddStyleSheetLink", $"{ApiService.BaseAddress}/rgf/resource/bootstrap-submenu.css", false, BootstrapSubmenuCssId);
         await jsRuntime.InvokeVoidAsync("Recrovit.LPUtils.RemoveLinkedFile", "css/bootstrap/bootstrap.min.css", "stylesheet");
 
-        await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/scripts/" +
+        if (!_scriptsLoaded)
+        {
+            var api = serviceProvider.GetRequiredService<IRgfApiService>();
+            var res = await api.GetAsync<string[]>("/rgf/api/RGFSriptReferences/-legacy-blazorui-", authClient: false);
+            if (res.Success)
+            {
+                var sriptReferences = res.Result.Where(e => !RgfBlazorConfigurationExtension.SriptReferences.Contains(e)).ToArray();
+                foreach (var item in sriptReferences)
+                {
+                    await jsRuntime.InvokeAsync<IJSObjectReference>("import", ApiService.BaseAddress + item);
+                }
+                await jsRuntime.InvokeVoidAsync("Recrovit.WebCli.InitRgfJqueryUiEx");
+                _scriptsLoaded = true;
+            }
+
+            await jsRuntime.InvokeAsync<IJSObjectReference>("import", $"{RgfClientConfiguration.AppRootPath}_content/{libName}/scripts/" +
 #if DEBUG
-            "recrovit-rgf-blazor-ui.js"
+                "recrovit-rgf-blazor-ui.js"
 #else
             "recrovit-rgf-blazor-ui.min.js"
 #endif
-            );
+                );
+        }
         await jsRuntime.InvokeVoidAsync("eval", $"document.getElementsByTagName('html')[0].setAttribute('data-bs-theme', '{themeName}');");
     }
 
@@ -54,6 +78,7 @@ public class RGFClientBlazorUIConfiguration
     private static readonly string BlazorUICss = "rgf-client-blazor-ui";
     private static readonly string BlazorUICssLib = "rgf-client-blazor-ui_lib";
     private static readonly string BootstrapSubmenuCssId = "rgf-bootstrap-submenu";
+    private static bool _scriptsLoaded;
 
     public static readonly string JsBlazorUiNamespace = "Recrovit.RGF.Blazor.UI";
 }
@@ -68,8 +93,7 @@ public static class RGFClientBlazorUIConfigurationExtension
 
         if (loadResources)
         {
-            var jsRuntime = serviceProvider.GetRequiredService<IJSRuntime>();
-            await RGFClientBlazorUIConfiguration.LoadResourcesAsync(jsRuntime, themeName);
+            await RGFClientBlazorUIConfiguration.LoadResourcesAsync(serviceProvider, themeName);
         }
         var ver = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
         var logger = serviceProvider.GetRequiredService<ILogger<RGFClientBlazorUIConfiguration>>();
