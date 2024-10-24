@@ -1,0 +1,211 @@
+﻿@using ApexCharts
+@using Recrovit.RecroGridFramework.Blazor.RgfApexCharts.Components
+
+<RgfChartComponent @ref="RgfChartRef" EntityParameters="EntityParameters">
+    <ContentTemplate Context="RgfCharComp">
+        <div id="@ContainerId" class="card">
+            <div class="rgf-apexchart-header dialog-header card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="@_tabsId" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button type="button" class="nav-link@(ActiveTabIndex == 1 ? " active" : "")"
+                                id="@($"{_tabsId}-tab-1")"
+                                data-bs-toggle="tab" data-bs-target="@($"#{_tabsId}-tab-1-pane")" role="tab"
+                                @onclick="(e) => OnTabActivated(1)">
+                            @RecroDict.GetRgfUiString("Chart")
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button type="button" class="nav-link@(ActiveTabIndex == 2 ? " active" : "")"
+                                id="@($"{_tabsId}-tab-2")"
+                                data-bs-toggle="tab" data-bs-target="@($"#{_tabsId}-tab-2-pane")" role="tab"
+                                @onclick="(e) => OnTabActivated(2)">
+                            @RgfCharComp.GetRecroDictChart("DataSet")
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <div id="@($"{_tabsId}-tab-1-pane")" class="rgf-apexchart-content tab-pane fade show@((ActiveTabIndex == 1 ? " active " : " ") + ApexChartSettings.SeriesType.ToString().ToLower())" role="tabpanel" tabindex="0">
+                        <ApexChartComponent @ref=ApexChartRef ChartSettings="@ApexChartSettings" />
+                    </div>
+                    <div class="tab-pane fade show@(ActiveTabIndex == 2 ? " active" : "")" id="@($"{_tabsId}-tab-2-pane")" role="tabpanel" tabindex="0">
+                        @if (RgfCharComp.EmbeddedGrid != null)
+                        {
+                            @RgfCharComp.EmbeddedGrid
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ContentTemplate>
+
+    <FooterTemplate Context="RgfCharComp">
+        <EditForm EditContext="EditContext" OnValidSubmit="OnOk">
+            <div class="accordion pb-2">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button type="button" class="accordion-button" data-bs-toggle="collapse" data-bs-target="#@_panelId" aria-expanded="true" aria-controls="@_panelId"
+                                @onclick="(arg) => OnSettingsAccordionToggled()">
+                            @RecroDict.GetRgfUiString("Settings")
+                        </button>
+                    </h2>
+                    <div id="@_panelId" class="accordion-collapse collapse@(SettingsAccordionActive ? " show" : "")">
+                        <div class="accordion-body">
+                            <div class="d-flex justify-content-start border border-light-subtle overflow-auto">
+                                <div class="p-1 col-2 text-center">
+                                    <div class="fw-bold">Y @RgfCharComp.GetRecroDictChart("Axis").ToLower()</div>
+                                    <div class="small">@RgfCharComp.GetRecroDictChart("SelectDataColumns")</div>
+                                </div>
+                                @for (int i = 0; i < ChartParameters.AggregationSettings.Columns.Count(); i++)
+                                {
+                                    var idx = i;
+                                    var col = ChartParameters.AggregationSettings.Columns[idx];
+                                    <div class="p-1 col-auto">
+                                        <ValidationMessage For="@(() => col.Aggregate)" />
+                                        <ValidationMessage For="@(() => col.PropertyId)" />
+                                        <RgfComboBox TValue="string"
+                                                     Items="RgfAggregationColumn.AllowedAggregates"
+                                                     @bind-Value="col.Aggregate"
+                                                     OnValueChanging="() => RgfCharComp.SetState(false)" />
+                                        @if (col.Aggregate != "Count")
+                                        {
+                                            <RgfComboBox TValue="int"
+                                                         DataSource="RgfCharComp.ChartColumnsNumeric"
+                                                         @bind-Value="col.PropertyId"
+                                                         OnValueChanging="() => RgfCharComp.SetState(false)" />
+                                        }
+                                    </div>
+                                    @if (i != 0)
+                                    {
+                                        <div class="p-1 col-auto">
+                                            <RgfButton Label="-" CssClass="btn-outline-primary" OnClick="(arg) => RgfCharComp.RemoveColumn(col)" />
+                                        </div>
+                                    }
+                                }
+                                <div class="p-1 col-auto">
+                                    <RgfButton Label="+" CssClass="btn-outline-primary" OnClick="(arg) => RgfCharComp.AddColumn()" />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start border border-light-subtle overflow-auto">
+                                <div class="p-1 col-2 text-center">
+                                    <div class="fw-bold">X @RgfCharComp.GetRecroDictChart("Axis").ToLower()</div>
+                                    <div class="small">@RgfCharComp.GetRecroDictChart("GroupValues")</div>
+                                </div>
+                                @for (int i = 0; i < ChartParameters.AggregationSettings.Groups.Count(); i++)
+                                {
+                                    var idx = i;
+                                    <div class="p-1 col-auto">
+                                        <ValidationMessage For="@(() => ChartParameters.AggregationSettings.Groups[idx])" />
+                                        <RgfComboBox TValue="int"
+                                                     DataSource="RgfCharComp.AllowedProperties.OrderBy(e => e.ColTitle).ToDictionary(p => p.Id, p => p.ColTitle)"
+                                                     @bind-Value="ChartParameters.AggregationSettings.Groups[idx]"
+                                                     OnValueChanging="() => RgfCharComp.SetState(false)" />
+                                    </div>
+                                    <div class="p-1 col-auto">
+                                        <RgfButton Label="-" CssClass="btn-outline-primary" OnClick="(arg) => RgfCharComp.RemoveAtGroup(idx)" />
+                                    </div>
+                                }
+                                <div class="p-1 col-auto">
+                                    <RgfButton Label="+" CssClass="btn-outline-primary" OnClick="(arg) => RgfCharComp.AddGroup()" />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start border border-light-subtle overflow-auto">
+                                <div class="p-1 col-2 text-center">
+                                    <div class="fw-bold">@RgfCharComp.GetRecroDictChart("AdditionalGrouping")</div>
+                                    <div class="small">@RgfCharComp.GetRecroDictChart("SeriesGrouping")</div>
+                                </div>
+                                @for (int i = 0; i < ChartParameters.AggregationSettings.SubGroup.Count(); i++)
+                                {
+                                    var idx = i;
+                                    <div class="p-1 col-auto">
+                                        <ValidationMessage For="@(() => ChartParameters.AggregationSettings.SubGroup[idx])" />
+                                        <RgfComboBox TValue="int"
+                                                     DataSource="RgfCharComp.AllowedProperties.OrderBy(e => e.ColTitle).ToDictionary(p => p.Id, p => p.ColTitle)"
+                                                     @bind-Value="ChartParameters.AggregationSettings.SubGroup[idx]"
+                                                     OnValueChanging="() => RgfCharComp.SetState(false)" />
+                                    </div>
+                                    <div class="p-1 col-auto">
+                                        <RgfButton Label="-" CssClass="btn-outline-primary" OnClick="(arg) => RgfCharComp.RemoveAtSubGroup(idx)" />
+                                    </div>
+                                }
+                                <div class="p-1 col-auto">
+                                    <RgfButton Label="+" CssClass="btn-outline-primary" OnClick="(arg) => RgfCharComp.AddSubGroup()" />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start">
+                                <div class="p-1 col-2">
+                                    <RgfComboBox TValue="RgfChartSeriesType" Label="@RecroDict.GetRgfUiString("ChartType")"
+                                                 DataSource="EnumExtensions.ToDictionary<RgfChartSeriesType>()"
+                                                 @bind-Value="ChartParameters.SeriesType"
+                                                 OnValueChanging="(e) => ChangeChartType(e.NewValue)" />
+                                </div>
+                                <div class="p-1 col-2 checkbox-lg mt-4">
+                                    <RgfCheckBox Label="@RecroDict.GetRgfUiString("Stacked")" Disabled="@(ChartParameters.SeriesType != RgfChartSeriesType.Bar)"
+                                                 @bind-Value="@ChartParameters.Stacked"
+                                                 OnValueChanging="(e) => { ApexChartSettings.Options.Chart.Stacked = e.NewValue; TryUpdateChart(e);}" />
+                                </div>
+                                <div class="p-1 col-2 checkbox-lg mt-4">
+                                    <RgfCheckBox Label="@RecroDict.GetRgfUiString("Horizontal")" Disabled="@(ChartParameters.SeriesType != RgfChartSeriesType.Bar)"
+                                                 @bind-Value="@ChartParameters.Horizontal"
+                                                 OnValueChanging="(e) => { ApexChartSettings.Options.PlotOptions.Bar.Horizontal = e.NewValue; TryUpdateChart(e);}" />
+                                </div>
+                                <div class="p-1 col-2 checkbox-lg mt-4">
+                                    <RgfCheckBox Label="@RgfCharComp.GetRecroDictChart("Legend")"
+                                                 @bind-Value="@ChartParameters.Legend"
+                                                 OnValueChanging="(e) => ChangedLegend(e.NewValue)" />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-start">
+                                <div class="p-1 col-2">
+                                    <RgfComboBox TValue="Mode?" Label="@RecroDict.GetRgfUiString("Theme")"
+                                                 DataSource="EnumExtensions.ToNullableDictionary<Mode>()"
+                                                 @bind-Value="ApexChartSettings.Options.Theme.Mode"
+                                                 OnValueChanging="TryUpdateChart" />
+                                </div>
+                                <div class="p-1 col-2">
+                                    <RgfComboBox TValue="PaletteType?" Label="@RgfCharComp.GetRecroDictChart("Palette")"
+                                                 DataSource="EnumExtensions.ToNullableDictionary<PaletteType>()"
+                                                 @bind-Value="ApexChartSettings.Options.Theme.Palette"
+                                                 OnValueChanging="TryUpdateChart" />
+                                </div>
+                                <div class="p-1 col-2">
+                                    <RgfInputNumber Label="@RecroDict.GetRgfUiString("Width")"
+                                                    @bind-Value="ApexChartSettings.Width" MinWidth="5rem" />
+                                </div>
+                                <div class="p-1 col-2">
+                                    <RgfInputNumber Label="@RecroDict.GetRgfUiString("Height")"
+                                                    @bind-Value="ApexChartSettings.Height" MinWidth="5rem" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <div class="p-1">
+                    <RgfButton CssClass="btn-outline-primary" MinWidth="4rem" Label="@RecroDict.GetRgfUiString("Redraw")" Disabled="@(!RgfCharComp.IsStateValid)"
+                               OnClick="(arg) => OnRedraw()" />
+                </div>
+                <div class="p-1">
+                    <RgfButton CssClass="btn-primary" MinWidth="4rem" Label="@RecroDict.GetRgfUiString("Create")" Disabled="RgfCharComp.IsStateValid"
+                               OnClick="(arg) => OnOk()" />
+                </div>
+                <div class="p-1">
+                    <RgfButton CssClass="btn-secondary" MinWidth="4rem" Label="@RecroDict.GetRgfUiString("Close")"
+                               OnClick="RgfCharComp.OnClose" />
+                </div>
+            </div>
+        </EditForm>
+    </FooterTemplate>
+</RgfChartComponent>
+
+@inherits BaseChartComponent
+@code {
+
+    private readonly string _tabsId = RgfBaseComponent.GetNextId();
+    private readonly string _panelId = RgfBaseComponent.GetNextId();
+
+    public override Task Resize(int width, int height) => base.Resize(width - 1, height - 25);
+}
