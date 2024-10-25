@@ -49,7 +49,7 @@
 
   <ItemGroup>
     <None Update="Components\Base\RgfCheckBox.razor.css" CssScope="rgf-bs-checkbox" />
-    <None Update="Components\Base\RgfComboBox.razor.css" CssScope="rg-combobox" />
+    <None Update="Components\Base\RgfComboBox.razor.css" CssScope="rgf-bs-combobox" />
     <None Update="Components\ChartComponent.razor.css" CssScope="rgf-bs-apexcharts" />
     <None Update="Components\DialogComponent.razor.css" CssScope="rgf-bs-dialog" />
   </ItemGroup>

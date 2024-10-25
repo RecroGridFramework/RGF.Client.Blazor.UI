@@ -39,17 +39,23 @@
     private void ShowToast(IRgfEventArgs<RgfToastEvent> arg)
     {
         var toast = arg.Args;
-        toasts.Add(toast);
-        StateHasChanged();
-
-        if (toast.Delay > 0)
+        if (toast.Delay < 0)
         {
-            _ = InvokeAsync(async () =>
-            {
-                await Task.Delay(Math.Max(1000, toast.Delay));
-                RemoveToast(toast);
-            });
+            RemoveToast(toast);
         }
+        else
+        {
+            toasts.Add(toast);
+            if (toast.Delay > 0)
+            {
+                _ = InvokeAsync(async () =>
+                {
+                    await Task.Delay(Math.Max(1000, toast.Delay));
+                    RemoveToast(toast);
+                });
+            }
+        }
+        StateHasChanged();
     }
 
     private void RemoveToast(RgfToastEvent toast)

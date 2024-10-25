@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.3.1
+* recrovit-rgf-blazor-ui.js v1.3.2
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -156,7 +156,7 @@ Blazor.UI = {
             var combo = $(`#${comboBoxId}`).rgcombobox({
                 value: value,
                 inputClass: 'rgf-combobox-edit form-control form-control-sm',
-                button: '<button class="rgf-combobox-button btn btn-outline-secondary" type="button" rg-combobox=""><i class="bi bi-caret-down-fill"></i></button>',
+                button: '<button class="rgf-combobox-button btn btn-outline-secondary" type="button" rgf-bs-combobox=""><i class="bi bi-caret-down-fill"></i></button>',
                 noWrapper: true,
                 calcWidth: false,
                 width: width

@@ -99,13 +99,13 @@
                                     <RgfCheckBox Label="@RecroDict.GetRgfUiString("Public")" Reverse="true" WrapperCssClass="d-flex flex-row-reverse align-items-center"
                                                  @bind-Value="RgfToolbar.GridSetting.IsPublicNonNullable" Disabled="!RgfToolbar.IsPublicGridSettingAllowed || string.IsNullOrEmpty(RgfToolbar.GridSetting.SettingsName)" />
                                 </div>
-                                <div class="">
+                                <div>
                                     <RgfButton IconName="bi-floppy" CssClass="btn-outline-secondary" Title="@RecroDict.GetRgfUiString("Save")"
                                                Disabled="string.IsNullOrEmpty(RgfToolbar.GridSetting.SettingsName) || !RgfToolbar.IsPublicGridSettingAllowed && RgfToolbar.GridSetting.IsPublicNonNullable"
-                                               OnClick="() => RgfToolbar.OnSaveGridSettingsAsync()" />
+                                               OnClick="(arg) => RgfToolbar.OnSaveGridSettingsAsync()" />
                                     <RgfButton IconName="bi-trash" CssClass="btn-outline-secondary" Title="@RecroDict.GetRgfUiString("Delete")"
                                                Disabled="RgfToolbar.GridSetting.GridSettingsId == null || !RgfToolbar.IsPublicGridSettingAllowed && RgfToolbar.GridSetting.IsPublicNonNullable"
-                                               OnClick="() => RgfToolbar.OnDeleteGridSettingsAsync()" />
+                                               OnClick="(arg) => RgfToolbar.OnDeleteGridSettingsAsync()" />
                                 </div>
                             </div>
                         </div>

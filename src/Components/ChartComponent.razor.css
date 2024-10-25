@@ -1,4 +1,8 @@
-﻿.pie ::deep div.apx-legend-position-right,
+﻿.rgf-apexchart-content {
+    overflow: auto;
+}
+
+.pie ::deep div.apx-legend-position-right,
 .donut ::deep div.apx-legend-position-right {
     width: 33%;
 }
