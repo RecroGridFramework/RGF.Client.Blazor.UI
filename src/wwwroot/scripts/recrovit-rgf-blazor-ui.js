@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.4.0
+* recrovit-rgf-blazor-ui.js v1.4.1
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -11,11 +11,6 @@ Blazor.UI = {
     Dialog: {
         initialize: function (dialogId, resizable, uniqueName, focusId) {
             var dialog = document.getElementById(dialogId);
-            //var d = new bootstrap.Modal(`#${dialogId}`, { keyboard: false });
-            if (resizable) {
-                var dialogContent = $('div.modal-content', dialog).first();
-                Recrovit.LPUtils.ResizableWithResponsiveFlex(dialogContent);
-            }
             $('div.modal-dialog', dialog).draggable({ handle: '.modal-header, .dialog-header' });
             if (focusId != null) {
                 document.getElementById(focusId).focus();
@@ -25,6 +20,13 @@ Blazor.UI = {
             }
             $('div.modal-dialog', dialog).height('auto');
             Blazor.UI.Dialog.loadDialogPos(uniqueName, dialogId, true);
+            if (resizable) {
+                var dialogContent = $('div.modal-content', dialog).first();
+                Recrovit.LPUtils.ResizableWithResponsiveFlex(dialogContent);
+                window.setTimeout(function () {
+                    Recrovit.LPUtils.ResizeResponsiveFlex(dialogContent);
+                }, 1000);
+            }
         },
         saveDialogPos: function (name, dialogId) {
             const key = `RGF.DialogPos.${name}`;
