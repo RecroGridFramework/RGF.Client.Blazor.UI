@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.4.1
+* recrovit-rgf-blazor-ui.js v1.5.0
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -76,11 +76,14 @@ Blazor.UI = {
     },
     Grid: {
         selectRow: function (row, idx) {
-            //$(table).find('tr').eq(idx).addClass('table-active');
-            $(row).addClass('table-active');
+            //$(table).find('tr').eq(idx).addClass('table-primary');
+            $(row).addClass('table-primary');
+        },
+        deselectRow: function (row, idx) {
+            $(row).removeClass('table-primary');
         },
         deselectAllRow: function (table) {
-            $('tr', table).removeClass('table-active');
+            $('tr', table).removeClass('table-primary');
         },
         initializeTable: function (gridRef, table) {
             var rgfTable = new Recrovit.WebCli.RgfTable(table);

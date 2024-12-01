@@ -36,8 +36,13 @@
                     {
                         int rowIdx = index++;
                         var attributes = rowData.Get<RgfDynamicDictionary>("__attributes");
+                        string? rowClass = attributes?.Get<string>("class");
+                        if (_rgfGridRef.SelectedItems.ContainsKey(ListHandler.GetAbsoluteRowIndex(rowData)))
+                        {
+                            rowClass = rowClass == null ? "table-primary" : rowClass + " table-primary";
+                        }
                         <tr @ref="_rowRef[rowIdx]" data-row="@rowIdx"
-                            class="@(attributes?.Get<string>("class"))"
+                            class="@rowClass"
                             style="@(attributes?.Get<string>("style"))"
                             @onclick="(arg) => OnRowClick(arg, rowData, rowIdx)">
                             @foreach (var prop in EntityDesc.SortedVisibleColumns)
