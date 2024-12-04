@@ -75,9 +75,10 @@ public partial class GridComponent : ComponentBase, IDisposable
     public Task SetColumnPos(int from, int to) => ListHandler.MoveColumnAsync(from, to);
 
     [JSInvokable]
-    public string? GetTooltipText(int rowIndex, int colId)
+    public string? GetTooltipText(int relativeRowIndex, int colId)
     {
-        var tooltip = _rgfGridRef.GetColumnData(rowIndex, colId)?.ToString();
+        var absoluteRowIndex = ListHandler.ToAbsoluteRowIndex(relativeRowIndex);
+        var tooltip = _rgfGridRef.GetColumnData(absoluteRowIndex, colId)?.ToString();
         if (string.IsNullOrEmpty(tooltip))
         {
             return null;
@@ -195,17 +196,17 @@ public partial class GridComponent : ComponentBase, IDisposable
         {
             if (_rgfGridRef.SelectedItems.Any())
             {
-                int absoluteIndex = ListHandler.GetAbsoluteRowIndex(rowData);
+                int absoluteRowIndex = ListHandler.GetAbsoluteRowIndex(rowData);
                 int selectedItemsCount = _rgfGridRef.SelectedItems.Count;
-                bool deselect = _rgfGridRef.SelectedItems.ContainsKey(absoluteIndex);
+                bool deselect = _rgfGridRef.SelectedItems.ContainsKey(absoluteRowIndex);
                 if (GridParameters.EnableMultiRowSelection == true && (args.CtrlKey || args.ShiftKey))
                 {
                     if (args.ShiftKey)
                     {
-                        int minIdx = _rgfGridRef.SelectedItems.Keys.Where(key => key < absoluteIndex).DefaultIfEmpty(-1).Max();
+                        int minIdx = _rgfGridRef.SelectedItems.Keys.Where(key => key < absoluteRowIndex).DefaultIfEmpty(-1).Max();
                         if (minIdx >= 0)
                         {
-                            for (int i = minIdx + 1; i < absoluteIndex; i++)
+                            for (int i = minIdx + 1; i < absoluteRowIndex; i++)
                             {
                                 var data = await ListHandler.EnsureVisibleAsync(i);
                                 if (data != null)
@@ -220,7 +221,7 @@ public partial class GridComponent : ComponentBase, IDisposable
                     else if (deselect)
                     {
                         await _rgfGridRef.RowDeselectHandlerAsync(rowData);
-                        int rowIndex = Manager.ListHandler.ToRelativeRowIndex(absoluteIndex);
+                        int rowIndex = Manager.ListHandler.ToRelativeRowIndex(absoluteRowIndex);
                         if (rowIndex != -1)
                         {
                             await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Grid.deselectRow", _rowRef[rowIndex], rowIndex);

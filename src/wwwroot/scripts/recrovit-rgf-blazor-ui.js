@@ -83,7 +83,7 @@ Blazor.UI = {
             $(row).removeClass('table-primary');
         },
         deselectAllRow: function (table) {
-            $('tr', table).removeClass('table-primary');
+            $('tr.table-primary', table).removeClass('table-primary');
         },
         initializeTable: function (gridRef, table) {
             var rgfTable = new Recrovit.WebCli.RgfTable(table);
@@ -95,25 +95,31 @@ Blazor.UI = {
                     gridRef.invokeMethodAsync('SetColumnPos', idx, newIdx > idx ? newIdx - 1 : newIdx);
                 }
             });
-            BlazorGrids.initializeTooltips(gridRef);
+            BlazorGrids.initializeTooltips(gridRef, table);
         },
-        initializeTooltips: function (gridRef) {
-            var tooltipTriggerArr = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerArr.forEach(function (element) {
-                var tooltip = new bootstrap.Tooltip(element, {
-                    title: element.innerText,
+        initializeTooltips: function (gridRef, table) {
+            $('td', table).each(function () {
+                var element = $(this);
+                element.off('show.bs.tooltip');
+                bootstrap.Tooltip.getInstance(element[0])?.dispose();
+            });
+            var tooltipTriggerArr = $('td[data-bs-toggle="tooltip"]', table);
+            tooltipTriggerArr.each(function () {
+                var element = $(this);
+                var tooltip = new bootstrap.Tooltip(element[0], {
+                    title: element.text(),
                     customClass: 'rgf-cell-tooltip',
                     trigger: 'hover',
                     delay: { show: 500 },
                     html: true
                 });
-                element.addEventListener('show.bs.tooltip', async function () {
+                element.on('show.bs.tooltip', async function () {
                     if (tooltip.tooltipText == null) {
-                        var col = $(this).attr('data-cell');
-                        var rowIdx = $(this).parent('tr').attr('data-row');
+                        var col = element.attr('data-cell');
+                        var rowIdx = element.closest('tr').attr('data-row');
                         tooltip.tooltipText = await gridRef.invokeMethodAsync('GetTooltipText', parseInt(rowIdx), parseInt(col));
                         if (tooltip.tooltipText == null) {
-                            tooltip.tooltipText = this.innerText;
+                            tooltip.tooltipText = element.text();
                         }
                         tooltip.setContent({ '.tooltip-inner': tooltip.tooltipText })
                     }
