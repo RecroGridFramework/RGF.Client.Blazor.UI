@@ -161,6 +161,9 @@ Blazor.UI = {
                     $(this).css({ width: '', height: '' });
                 }
             });
+        },
+        resizableDestroy: function (listBoxId) {
+            $(`#${listBoxId}`).resizable('destroy');
         }
     },
     ComboBox: {
@@ -195,6 +198,9 @@ Blazor.UI = {
         },
         setText: function (comboBoxId, text) {
             $(`#${comboBoxId}`).rgcombobox("instance").input.val(text);
+        },
+        clearText: function (comboBoxId) {
+            $(`#${comboBoxId}`).val('');
         },
         destroy: function (comboBoxId) {
             $(`#${comboBoxId}`).off('change.RGF-Client-Blazor-UI').rgcombobox("destroy");
