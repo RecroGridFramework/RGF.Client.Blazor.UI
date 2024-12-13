@@ -132,6 +132,6 @@
 
     private Task OnGridSettingsChanged(KeyValuePair<object?, string> item)
     {
-        return _rgfToolbarRef.OnSetGridSettingAsync(item.Key?.ToString(), item.Value);
+        return _rgfToolbarRef.OnSetGridSettingAsync(item.Key as int?, item.Value);
     }
 }
