@@ -18,10 +18,6 @@
 else
 {
     <select value="@Value" @attributes="_attributes">
-        @if (IncludeEmptyItem && !DataSource.Any(e => string.IsNullOrEmpty(e.Value?.ToString())))
-        {
-            <option value=""></option>
-        }
         @foreach (var option in DataSource)
         {
             <option value="@option.Key" selected="@(option.Key?.Equals(Value) == true)">@option.Value</option>
