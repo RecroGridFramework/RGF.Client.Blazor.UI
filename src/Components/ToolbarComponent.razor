@@ -5,14 +5,14 @@
                 <div class="d-flex">
                     @if (RgfToolbar.CustomMenu != null)
                     {
-                        <div class="dropdown me-2" role="group">
+                        <RgfHtml TagName="div" CssClass="dropdown me-2" role="group"
+                                 Tooltip="@RecroDict.GetRgfUiString("CustomFunctions")">
                             <div style="position:fixed;z-index:10;">
                                 @RgfToolbar.CustomMenu
                             </div>
                             <RgfButton IconName="bi-list-task" CssClass="btn-secondary dropdown-toggle"
-                                       Tooltip="@RecroDict.GetRgfUiString("CustomFunctions")"
                                        AdditionalAttributes="@(new(){ {"data-bs-toggle","dropdown"}, {"aria-expanded", "false"} })" />
-                        </div>
+                        </RgfHtml>
                     }
                     @if (Manager.EntityDesc.Options.GetBoolValue("RGO_ClientMode") != true)
                     {
@@ -68,14 +68,14 @@
                     }
                     @if (RgfToolbar.SettingsMenu != null)
                     {
-                        <div class="dropdown me-2" role="group">
+                        <RgfHtml TagName="div" CssClass="dropdown me-2" Role="group"
+                                 Tooltip="@RecroDict.GetRgfUiString("Settings")">
                             <div style="position:fixed;z-index:10;">
                                 @RgfToolbar.SettingsMenu
                             </div>
                             <RgfButton IconName="bi-gear" CssClass="btn-secondary dropdown-toggle"
-                                       Tooltip="@RecroDict.GetRgfUiString("Settings")"
                                        AdditionalAttributes="@(new(){ {"data-bs-toggle","dropdown"}, {"aria-expanded", "false"} })" />
-                        </div>
+                        </RgfHtml>
                     }
                     @if (RgfToolbar.SelectParam != null && Manager.EntityDesc.Options.GetBoolValue("RGO_SelectMode") == true)
                     {

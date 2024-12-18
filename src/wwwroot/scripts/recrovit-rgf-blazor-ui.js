@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.6.0
+* recrovit-rgf-blazor-ui.js v1.6.1
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -235,7 +235,7 @@ Blazor.UI = {
     },
     Menu: {
         hide: function (element) {
-            $(element).removeClass('show').addClass('hide');
+            $(element).removeClass('show');
         }
     }
 };
