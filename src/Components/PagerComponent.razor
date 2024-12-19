@@ -54,8 +54,10 @@
                         <li>
                             <div class="input-group input-group-sm">
                                 <label class="input-group-text">@RecroDict.GetRgfUiString("ItemsPerPage")</label>
-                                <RgfComboBox TValue="int" Items="@(new int[] { 5, 10, 15, 25 })" AllowCustom="true" Text="@RgfPager.PageSize.ToString()" Width="3rem"
-                                             Value="@RgfPager.PageSize" ValueExpression="() => RgfPager.PageSize" ValueChanged="RgfPager.PageSizeChanging" />
+                                <RgfComboBox TValue="int" Items="@(new int[] { 5, 10, 15, 25 })" AllowCustom="true" Text="@(_tmpPageSize ?? RgfPager.PageSize.ToString())" Width="3rem"
+                                             Value="@RgfPager.PageSize" ValueExpression="() => RgfPager.PageSize"
+                                             ValueChanged="OnPageValueChanged"
+                                             InputChanged="(arg) => _tmpPageSize = arg.Value" />
                             </div>
                         </li>
                     }
@@ -84,6 +86,7 @@
     private RgfPagerParameters PagerParameters { get => EntityParameters.PagerParameters; }
 
     private RgfPagerComponent _rgfPagerRef { get; set; } = null!;
+    private string? _tmpPageSize = null;
 
     private void OnShowFirstPage(MouseEventArgs args) => _rgfPagerRef.PageChanging(1);
     private void OnShowNextPage(MouseEventArgs args) => _rgfPagerRef.PageChanging(_rgfPagerRef.CurrentPage + 1);
@@ -91,4 +94,10 @@
     private void OnShowLastPage(MouseEventArgs args) => _rgfPagerRef.PageChanging(_rgfPagerRef.TotalPages);
 
     private string CalcWidth(int page) => page < 10000 ? "54px" : page < 1E7 ? "74px" : "114px";
+
+    protected void OnPageValueChanged(int value)
+    {
+        _tmpPageSize = value.ToString();
+        _rgfPagerRef.PageSizeChanging(value);
+    }
 }
