@@ -137,7 +137,7 @@
                     {
                         if (_embeddedGrid == null)
                         {
-                            _embeddedGrid = RgfEntityComponent.Create(new RgfEntityParameters(Property.ForeignEntity.EntityName, BaseFormComponent.Manager.SessionParams) { GridId = ItemData.StringValue });
+                            _embeddedGrid = RgfEntityComponent.Create(new RgfEntityParameters(Property.ForeignEntity.EntityName, BaseFormComponent.Manager.SessionParams) { GridId = ItemData.StringValue, DisplayMode = RfgDisplayMode.Grid });
                         }
                         @_embeddedGrid
                     }

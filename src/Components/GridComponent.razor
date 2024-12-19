@@ -2,7 +2,7 @@
 <RgfGridComponent @ref="_rgfGridRef" EntityParameters="EntityParameters" GridComponent="this"
                   ColumnTemplate="ColumnTemplate">
     <GridTemplate Context="RgfGrid">
-        @if (_rgfGridRef.IsProcessing)
+        @if (RgfGrid.IsProcessing)
         {
             <SpinnerComponent ContainerClass="spinner-flex" Style="width: 3rem; height: 3rem;" />
         }
@@ -30,7 +30,7 @@
                     }
                 </tr>
             </thead>
-            <tbody class="@(_rgfGridRef.IsProcessing ? "opacity-50" : null)">
+            <tbody class="@(RgfGrid.IsProcessing ? "opacity-50" : null)">
                 @{
                     int index = 0;
                     foreach (var rowData in RgfGrid.GridData)
@@ -38,7 +38,7 @@
                         int rowIdx = index++;
                         var attributes = rowData.Get<RgfDynamicDictionary>("__attributes");
                         string? rowClass = attributes?.Get<string>("class");
-                        if (_rgfGridRef.SelectedItems.ContainsKey(ListHandler.GetAbsoluteRowIndex(rowData)))
+                        if (RgfGrid.SelectedItems.ContainsKey(ListHandler.GetAbsoluteRowIndex(rowData)))
                         {
                             rowClass = rowClass == null ? "table-primary" : rowClass + " table-primary";
                         }
@@ -53,7 +53,7 @@
                                     class="@(propAttributes?.Get<string>("class"))"
                                     style="@(propAttributes?.Get<string>("style"))"
                                     data-bs-toggle="@(propAttributes?.Get<string?>("data-bs-toggle"))">
-                                    @RgfGrid.CreateGridColumn(prop, rowData)
+                                    @RgfGrid.RenderContentItem(prop, rowData)
                                 </td>
                             }
                         </tr>
@@ -64,7 +64,7 @@
     </GridTemplate>
 
     <ColumnSettingsTemplate>
-        <GridColumnSettingsComponent BaseGridComponent="context" />
+        <GridColumnSettingsComponent BaseDataComponent="context" />
     </ColumnSettingsTemplate>
 </RgfGridComponent>
 
@@ -88,6 +88,6 @@
                 return@<div class="text-center"><i class="@cssClass"></i></div>;
             }
         }
-        return param.BaseGridComponent.DefaultColumnTemplate(param);
+        return param.DataComponentBase.DefaultColumnTemplate(param);
     };
 }
