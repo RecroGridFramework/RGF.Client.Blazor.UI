@@ -28,6 +28,16 @@
                                                CssClass="@(RgfToolbar.IsFiltered ? "btn-success" : "btn-secondary")"
                                                Tooltip="@RecroDict.GetRgfUiString("Filter")"
                                                OnClick="() => RgfToolbar.OnToolbarCommand(RgfToolbarEventKind.ShowFilter)" />
+
+                                    @if (EntityParameters.DisplayMode == RfgDisplayMode.Grid)
+                                    {
+                                        <RgfButton IconName="@(ToolbarParameters.QuickFilterEnabled ? "bi-binoculars-fill" : "bi-binoculars")"
+                                                   CssClass="@(ToolbarParameters.QuickFilterEnabled ? "btn-success" : "btn-secondary")"
+                                                   Tooltip="@RecroDict.GetRgfUiString("QuickFilter")"
+                                                   OnClick="() => {
+                                                    ToolbarParameters.QuickFilterEnabled = !ToolbarParameters.QuickFilterEnabled;
+                                                    RgfToolbar.OnToolbarCommand(RgfToolbarEventKind.ToggleQuickFilter);}" />
+                                    }
                                 }
                             </div>
                         }
