@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.7.1
+* recrovit-rgf-blazor-ui.js v1.8.0
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -9,6 +9,14 @@ var Blazor = window.Recrovit.RGF.Blazor;
 
 Blazor.UI = {
     Base: {
+        setFocus: function (selector) {
+            var element = $(selector);
+            if (element.length) {
+                element.focus();
+                return true;
+            }
+            return false;
+        },
         tooltip: function (element, options) {
             var $element = $(element);
             if ($element.length !== 1) return null;
