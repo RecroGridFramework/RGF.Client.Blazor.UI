@@ -67,10 +67,16 @@ public partial class TreeNodeComponent : IDisposable
         }
     }
 
-    private void OnClickData(MouseEventArgs arg)
+    private void OnDblClick(MouseEventArgs arg)
     {
         var eventArgs = new RgfEventArgs<RgfToolbarEventArgs>(this, new RgfToolbarEventArgs(RgfToolbarEventKind.Read, Node.RowData));
         _ = EntityParameters?.ToolbarParameters.EventDispatcher.DispatchEventAsync(eventArgs.Args.EventKind, eventArgs);
+    }
+
+    private async Task OnClick(RgfTreeNodeParameters node)
+    {
+        var rowIndexAndKey = Manager.ListHandler.GetRowIndexAndKey(node.RowData);
+        await Manager.SelectedItems.SetValueAsync(new() { { rowIndexAndKey.Key, rowIndexAndKey.Value } });
     }
 
     public void Dispose()

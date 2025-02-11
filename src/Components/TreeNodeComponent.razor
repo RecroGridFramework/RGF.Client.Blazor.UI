@@ -23,7 +23,8 @@
         <RgfHtml TagName="div"
                  CssClass="@("data-node table d-inline tree-tooltip".EnsureContains(selected, ' ').EnsureContains(attributes?.Get<string>("class"), ' '))" AdditionalAttributes="@(new(){ {"rgf-bs-tree",""} })"
                  TooltipOptions="@(new RgfTooltipOptions(Node.TooltipText) { CustomClass = "rgf-tooltip-600"})"
-                 OnClick="OnClickData">
+                 OnClick="(arg) => OnClick(Node)"
+                 OnDblClick="OnDblClick">
             <RgfHtml TagName="div"
                      CssClass="@("d-inline".EnsureContains(propAttributes?.Get<string>("class"), ' '))" AdditionalAttributes="@(new(){ {"rgf-bs-tree",""} })"
                      Style="@(propAttributes?.Get<string>("style"))">
