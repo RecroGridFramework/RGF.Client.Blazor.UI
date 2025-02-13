@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.8.1
+* recrovit-rgf-blazor-ui.js v1.9.0
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -245,18 +245,62 @@ Blazor.UI = {
             });
         },
         setText: function (comboBoxId, text) {
-            $(`#${comboBoxId}`).rgcombobox("instance").input.val(text);
+            $(`#${comboBoxId}`).rgcombobox('instance').input.val(text);
         },
         clearText: function (comboBoxId) {
             $(`#${comboBoxId}`).val('');
         },
         destroy: function (comboBoxId) {
-            $(`#${comboBoxId}`).off('change.RGF-Client-Blazor-UI').rgcombobox("destroy");
+            $(`#${comboBoxId}`).off('change.RGF-Client-Blazor-UI').rgcombobox('destroy');
         }
     },
     Menu: {
         hide: function (element) {
             $(element).removeClass('show');
+        }
+    },
+    Splitter: {
+        initialize: function (splitter) {
+            $(splitter).on('mousedown', function () {
+                var $splitter = $(this);
+                if ($splitter.attr('disabled')) return;
+
+                var $container = $splitter.parent(),
+                    $leftPanel = $splitter.prev(),
+                    $rightPanel = $splitter.next();
+
+                var isResizing = true;
+
+                $('body').css('cursor', 'ew-resize');
+
+                $(document).on('mousemove', function (event) {
+                    if (!isResizing) return;
+
+                    var containerOffset = $container.offset().left;
+                    var containerWidth = $container.width();
+                    var newLeftWidth = event.pageX - containerOffset;
+                    var newRightWidth = containerWidth - newLeftWidth - $splitter.outerWidth();
+
+                    if (newLeftWidth > 100 && newRightWidth > 100) {
+                        $leftPanel.css('flex', `0 0 ${newLeftWidth}px`);
+                        $rightPanel.css('flex', `0 0 ${newRightWidth}px`);
+                    }
+                });
+
+                $(document).on('mouseup', function () {
+                    isResizing = false;
+                    $('body').css('cursor', '');
+                    $(document).off("mousemove mouseup");
+                });
+            });
+        },
+        disable: function (splitter) {
+            var $splitter = $(splitter),
+                $leftPanel = $splitter.prev(),
+                $rightPanel = $splitter.next();
+
+            $leftPanel.css('flex', '');
+            $rightPanel.css('flex', '');
         }
     }
 };

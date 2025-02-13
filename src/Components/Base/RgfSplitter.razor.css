@@ -1,0 +1,25 @@
+﻿.rgf-splitter-container[data-rgf-state="active"] {
+    display: flex !important;
+}
+
+.rgf-splitter-main-panel[data-rgf-state="active"] {
+    overflow: auto;
+}
+
+.rgf-splitter-secondary-panel[data-rgf-state="active"] {
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.rgf-splitter {
+    display: flex;
+    border-left: 2px dotted #000;
+    margin-left: 5px;
+    padding-right: 5px;
+    cursor: ew-resize;
+}
+
+    .rgf-splitter[disabled] {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
