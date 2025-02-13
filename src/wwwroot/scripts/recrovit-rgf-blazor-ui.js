@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.8.0
+* recrovit-rgf-blazor-ui.js v1.8.1
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -44,23 +44,25 @@ Blazor.UI = {
         }
     },
     Dialog: {
-        initialize: function (dialogId, resizable, uniqueName, focusId) {
+        initialize: function (dialogId, resizable, uniqueName, focusId, isInline) {
             var dialog = document.getElementById(dialogId);
-            $('div.modal-dialog', dialog).draggable({ handle: '.modal-header, .dialog-header' });
+            if (!isInline) {
+                $('div.modal-dialog', dialog).draggable({ handle: '.modal-header, .dialog-header' });
+                $('div.modal-dialog', dialog).height('auto');
+                Blazor.UI.Dialog.loadDialogPos(uniqueName, dialogId, true);
+                if (resizable) {
+                    var dialogContent = $('div.modal-content', dialog).first();
+                    Recrovit.LPUtils.ResizableWithResponsiveFlex(dialogContent);
+                    window.setTimeout(function () {
+                        Recrovit.LPUtils.ResizeResponsiveFlex(dialogContent);
+                    }, 1000);
+                }
+            }
             if (focusId != null) {
                 document.getElementById(focusId).focus();
             }
             else {
                 $('.btn-primary:first', dialog).focus();
-            }
-            $('div.modal-dialog', dialog).height('auto');
-            Blazor.UI.Dialog.loadDialogPos(uniqueName, dialogId, true);
-            if (resizable) {
-                var dialogContent = $('div.modal-content', dialog).first();
-                Recrovit.LPUtils.ResizableWithResponsiveFlex(dialogContent);
-                window.setTimeout(function () {
-                    Recrovit.LPUtils.ResizeResponsiveFlex(dialogContent);
-                }, 1000);
             }
         },
         saveDialogPos: function (name, dialogId) {

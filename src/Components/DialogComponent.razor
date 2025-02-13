@@ -1,8 +1,9 @@
-﻿
-<div class="modal-backdrop show"></div>
-
-<div id="@_dialogId" class="modal fade show" tabindex="-1" role="dialog" style="display:block">
-    <div class="modal-dialog modal-dialog-scrollable" @onkeydown="@OnKeyDown">
+﻿@if (!DialogParameters.IsInline)
+{
+    <div class="modal-backdrop show"></div>
+}
+<div id="@_dialogId" class="@(DialogParameters.IsInline ? null : "modal fade show")" tabindex="-1" role="dialog" style="display:block">
+    <div class="@(DialogParameters.IsInline ? null: "modal-dialog modal-dialog-scrollable")" @onkeydown="@OnKeyDown">
         <div @attributes="_attributes">
             @if (DialogParameters.NoHeader != true)
             {
@@ -117,14 +118,13 @@
         MinWidth = DialogParameters.MinWidth ?? "400px";
         Width = DialogParameters.Width;
         Height = DialogParameters.Height;
-        //IsModal = DialogParameters.IsModal;
 
         base.OnParametersSet();
     }
 
     private void Destroy()
     {
-        if (!_isDestroyed)
+        if (!_isDestroyed && !DialogParameters.IsInline)
         {
             if (!string.IsNullOrEmpty(DialogParameters.UniqueName))
             {
@@ -160,7 +160,7 @@
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.initialize", _dialogId, DialogParameters.Resizable, DialogParameters.UniqueName, _focusId);
+            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.initialize", _dialogId, DialogParameters.Resizable, DialogParameters.UniqueName, _focusId, DialogParameters.IsInline);
         }
     }
 }
