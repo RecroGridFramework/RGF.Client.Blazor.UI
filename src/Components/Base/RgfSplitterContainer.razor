@@ -1,0 +1,42 @@
+﻿@if (Node != null)
+{
+    @if (Node.PrimaryNode != null && Node.SecondaryNode != null)
+    {
+        <RgfSplitter IsVertical="Node.Direction == RgfSplitterDirection.Top || Node.Direction == RgfSplitterDirection.Bottom" IsResizable="IsResizable" AdditionalAttributes="AdditionalAttributes">
+            <PrimaryPanel>
+                <RgfSplitterContainer Node="Node.PrimaryNode" IsResizable="false" />
+            </PrimaryPanel>
+            <SecondaryPanel>
+                <RgfSplitterContainer Node="Node.SecondaryNode" IsResizable="false" />
+            </SecondaryPanel>
+        </RgfSplitter>
+    }
+    else
+    {
+        if (Node.PrimaryNode != null)
+        {
+            <RgfSplitterContainer Node="Node.PrimaryNode" IsResizable="false" />
+        }
+        else if (Node.SecondaryNode != null)
+        {
+            <RgfSplitterContainer Node="Node.SecondaryNode" IsResizable="false" />
+        }
+        else
+        {
+            @Node.Content
+        }
+    }
+}
+
+@inherits RgfBaseComponent
+@code {
+
+    [Parameter]
+    public RenderFragment? InitialContent { get; set; }
+
+    [Parameter]
+    public bool IsResizable { get; set; } = false;
+
+    [Parameter]
+    public RgfSplitterNode? Node { get; set; }
+}

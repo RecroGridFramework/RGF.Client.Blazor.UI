@@ -37,7 +37,8 @@ Blazor.UI = {
                     html: options.allowHtml,
                     delay: { show: 500 }
                 });
-            } else {
+            }
+            else {
                 tooltipInstance.setContent({ '.tooltip-inner': options.title });
             }
             return tooltipInstance;
@@ -260,49 +261,106 @@ Blazor.UI = {
         }
     },
     Splitter: {
-        initialize: function (splitter) {
-            $(splitter).on('mousedown', function () {
+        initialize: function (container) {
+            var $c = $(container),
+                $s = $c.children('.rgf-splitter');
+
+            $s.off('mousedown.rgfSplitter');
+            if ($c.attr('disabled')) return;
+
+            $s.on('mousedown.rgfSplitter', function () {
                 var $splitter = $(this);
-                if ($splitter.attr('disabled')) return;
+
+                const isHorizontal = $splitter.parent().hasClass('horizontal');
+                const minSize = isHorizontal ? 100 : 50;
 
                 var $container = $splitter.parent(),
-                    $leftPanel = $splitter.prev(),
-                    $rightPanel = $splitter.next();
+                    $primaryPanel = $splitter.prev(),
+                    $secondaryPanel = $splitter.next();
 
                 var isResizing = true;
+                $('body').css('cursor', isHorizontal ? 'ew-resize' : 'ns-resize');
 
-                $('body').css('cursor', 'ew-resize');
-
-                $(document).on('mousemove', function (event) {
+                $(document).on('mousemove.rgfSplitter', function (event) {
                     if (!isResizing) return;
 
-                    var containerOffset = $container.offset().left;
-                    var containerWidth = $container.width();
-                    var newLeftWidth = event.pageX - containerOffset;
-                    var newRightWidth = containerWidth - newLeftWidth - $splitter.outerWidth();
+                    var newPrimarySize;
+                    var newSecondarySize;
 
-                    if (newLeftWidth > 100 && newRightWidth > 100) {
-                        $leftPanel.css('flex', `0 0 ${newLeftWidth}px`);
-                        $rightPanel.css('flex', `0 0 ${newRightWidth}px`);
+                    if (isHorizontal) {
+                        var containerOffset = $container.offset().left,
+                            containerSize = $container.width();
+
+                        newPrimarySize = event.pageX - containerOffset;
+                        newSecondarySize = containerSize - newPrimarySize - $splitter.outerWidth(true);
+                        if ($container.resizable('instance')) {
+                            $container.resizable('option', 'minWidth', newPrimarySize + minSize);
+                        }
+                    }
+                    else {
+                        var containerOffset = $container.offset().top,
+                            containerSize = $container.height();
+
+                        newPrimarySize = event.pageY - containerOffset;
+                        newSecondarySize = containerSize - newPrimarySize - $splitter.outerHeight(true);
+                        if ($container.resizable('instance')) {
+                            $container.resizable('option', 'minHeight', newPrimarySize + minSize);
+                        }
+                    }
+
+                    if (newPrimarySize > minSize && newSecondarySize > minSize) {
+                        $primaryPanel.css('flex', `0 0 ${newPrimarySize}px`);
+                        $secondaryPanel.css('flex', `0 0 ${newSecondarySize}px`);
+                        BlazorSplitter.clearSiblingFlex($primaryPanel, isHorizontal);
                     }
                 });
 
-                $(document).on('mouseup', function () {
+                $(document).on('mouseup.rgfSplitter', function () {
                     isResizing = false;
                     $('body').css('cursor', '');
-                    $(document).off("mousemove mouseup");
+                    $(document).off("mousemove.rgfSplitter mouseup.rgfSplitter");
                 });
             });
         },
-        disable: function (splitter) {
-            var $splitter = $(splitter),
-                $leftPanel = $splitter.prev(),
-                $rightPanel = $splitter.next();
+        clearSiblingFlex: function ($panel, horizontal) {
+            if ($panel.length == 0) {
+                return;
+            }
+            var $container = $panel?.children('.rgf-splitter-container');
+            if ($container.length > 0) {
+                if (horizontal && $container.hasClass('horizontal') ||
+                    !horizontal && $container.hasClass('vertical')) {
+                    $container.children('div.rgf-splitter-secondary-panel').css('flex', '');
+                    return;
+                }
+                BlazorSplitter.clearSiblingFlex($container.children('div.rgf-splitter-primary-panel'), horizontal);
+                BlazorSplitter.clearSiblingFlex($container.children('div.rgf-splitter-secondary-panel'), horizontal);
+            }
+        },
+        resizable: function (container) {
+            if ($(container).resizable('instance')) {
+                return;
+            }
+            $(container).resizable({
+                resize: function (event, ui) {
+                    $(this).find('div.rgf-splitter-primary-panel, div.rgf-splitter-secondary-panel').css('flex', '');
+                }
+            });
+        },
+        disable: function (container) {
+            var $container = $(container),
+                $splitter = $container.children('.rgf-splitter'),
+                $primaryPanel = $splitter.prev(),
+                $secondaryPanel = $splitter.next();
 
-            $leftPanel.css('flex', '');
-            $rightPanel.css('flex', '');
+            $primaryPanel.css('flex', '');
+            $secondaryPanel.css('flex', '');
+            if ($container.resizable('instance')) {
+                $container.resizable("destroy");
+            }
         }
     }
 };
 
 const BlazorGrids = Blazor.UI.Grid;
+const BlazorSplitter = Blazor.UI.Splitter;

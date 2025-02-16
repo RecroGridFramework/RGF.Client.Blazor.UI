@@ -1,9 +1,9 @@
-﻿<div class="rgf-splitter-container" data-rgf-state="@(Visibility == VisibilityState.Hidden ? null : "active")">
-    <div class="rgf-splitter-main-panel" data-rgf-state="@(Visibility == VisibilityState.Hidden ? null : "active")">
-        @MainPanel
+﻿<div @ref="_elementReference" @attributes="_attributes">
+    <div class="rgf-splitter-primary-panel">
+        @PrimaryPanel
     </div>
-    <div @ref="_elementReference" @attributes="_attributes"></div>
-    <div class="rgf-splitter-secondary-panel" data-rgf-state="@(Visibility == VisibilityState.Hidden ? null : "active")">
+    <div class="rgf-splitter"></div>
+    <div class="rgf-splitter-secondary-panel">
         @SecondaryPanel
     </div>
 </div>
@@ -12,14 +12,27 @@
 @code {
 
     [Parameter, EditorRequired]
-    public RenderFragment MainPanel { get; set; } = null!;
+    public RenderFragment PrimaryPanel { get; set; } = null!;
 
     [Parameter, EditorRequired]
     public RenderFragment SecondaryPanel { get; set; } = null!;
 
+    [Parameter]
+    public bool IsVertical { get; set; } = false;
+
+    [Parameter]
+    public bool IsResizable { get; set; } = false;
+
+    [Parameter]
+    public bool IsDisabledSplitter { get; set; } = false;
+
     protected override void OnParametersSet()
     {
-        _baseCssClass = "rgf-splitter";
+        _baseCssClass = "rgf-splitter-container " + (IsVertical ? "vertical" : "horizontal");
+        if (!IsResizable)
+        {
+            _baseCssClass += " w-100 h-100";
+        }
 
         base.OnParametersSet();
     }
@@ -27,13 +40,18 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        if (firstRender)
-        {
-            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Splitter.initialize", _elementReference);
-        }
-        else if(Visibility == VisibilityState.Hidden)
+
+        if (IsDisabledSplitter)
         {
             await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Splitter.disable", _elementReference);
+        }
+        else
+        {
+            if (IsResizable)
+            {
+                await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Splitter.resizable", _elementReference);
+            }
+            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Splitter.initialize", _elementReference);
         }
     }
 }
