@@ -108,8 +108,9 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Destroy, DestroyAsync, true);
-        DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Refresh, (arg) => StateHasChanged(), this);
+        DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Destroy, OnDestroyAsync);
+        DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Refresh, (arg) => StateHasChanged(), true, this);
+
         DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Initialized, this);
     }
 
@@ -125,7 +126,7 @@
         base.OnParametersSet();
     }
 
-    private async Task DestroyAsync(IRgfEventArgs<RgfDialogEventArgs> args)
+    private async Task OnDestroyAsync(IRgfEventArgs<RgfDialogEventArgs> args)
     {
         if (!_isDestroyed && !DialogParameters.IsInline)
         {
@@ -135,30 +136,12 @@
             }
             _isDestroyed = true;
             DialogParameters.EventDispatcher.Unsubscribe(this);
-            await DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Destroyed, this);
         }
     }
 
-    private void OnClose(MouseEventArgs args)
-    {
-        bool cancel = false;
-        if (DialogParameters.OnClose != null)
-        {
-            cancel = DialogParameters.OnClose.Invoke() == false;
-        }
-        else
-        {
-            DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Destroy, this);
-        }
-    }
+    private Task OnClose() => DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Close, this);
 
-    public void OnKeyDown(KeyboardEventArgs args)
-    {
-        if (args.Code == "Escape")
-        {
-            OnClose(new());
-        }
-    }
+    private Task OnKeyDown(KeyboardEventArgs args) => args.Code == "Escape" ? OnClose() : Task.CompletedTask;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
