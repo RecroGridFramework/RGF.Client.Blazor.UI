@@ -1,4 +1,6 @@
-﻿@if (!DialogParameters.IsInline)
+﻿@using Recrovit.RecroGridFramework.Client.Events
+
+@if (!DialogParameters.IsInline)
 {
     <div class="modal-backdrop show"></div>
 }
@@ -106,8 +108,9 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        DialogParameters.Destroy = Destroy;
-        DialogParameters.Refresh = StateHasChanged;
+        DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Destroy, DestroyAsync, true);
+        DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Refresh, (arg) => StateHasChanged(), this);
+        DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Initialized, this);
     }
 
     protected override void OnParametersSet()
@@ -122,15 +125,17 @@
         base.OnParametersSet();
     }
 
-    private void Destroy()
+    private async Task DestroyAsync(IRgfEventArgs<RgfDialogEventArgs> args)
     {
         if (!_isDestroyed && !DialogParameters.IsInline)
         {
             if (!string.IsNullOrEmpty(DialogParameters.UniqueName))
             {
-                _ = _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.saveDialogPos", DialogParameters.UniqueName, _dialogId);
+                await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.saveDialogPos", DialogParameters.UniqueName, _dialogId);
             }
             _isDestroyed = true;
+            DialogParameters.EventDispatcher.Unsubscribe(this);
+            await DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Destroyed, this);
         }
     }
 
@@ -143,7 +148,7 @@
         }
         else
         {
-            DialogParameters.Destroy?.Invoke();
+            DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Destroy, this);
         }
     }
 
@@ -162,5 +167,11 @@
         {
             await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.initialize", _dialogId, DialogParameters.Resizable, DialogParameters.UniqueName, _focusId, DialogParameters.IsInline);
         }
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        DialogParameters?.EventDispatcher.Unsubscribe(this);
+        return base.DisposeAsync();
     }
 }

@@ -69,6 +69,6 @@ public partial class TreeNodeComponent : IDisposable
 
     public void Dispose()
     {
-        EntityParameters?.EventDispatcher.Unsubscribe(RgfEntityEventKind.Initialized, OnEntityInitialized);
+        EntityParameters?.UnsubscribeFromAll(this);
     }
 }
