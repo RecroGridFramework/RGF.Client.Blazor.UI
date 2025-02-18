@@ -1,30 +1,19 @@
-﻿@if (Node != null)
+﻿@if (Node?.IsDeleted == false)
 {
-    @if (Node.PrimaryNode != null && Node.SecondaryNode != null)
+    @if (Node.PrimaryNode != null || Node.SecondaryNode != null)
     {
         <RgfSplitter IsVertical="Node.Direction == RgfSplitterDirection.Top || Node.Direction == RgfSplitterDirection.Bottom" IsResizable="IsResizable" AdditionalAttributes="AdditionalAttributes">
             <PrimaryPanel>
-                <RgfSplitterContainer Node="Node.PrimaryNode" IsResizable="false" />
+                <RgfSplitterContainer Node="Node.PrimaryNode" ParentContainer="this" />
             </PrimaryPanel>
             <SecondaryPanel>
-                <RgfSplitterContainer Node="Node.SecondaryNode" IsResizable="false" />
+                <RgfSplitterContainer Node="Node.SecondaryNode" ParentContainer="this" />
             </SecondaryPanel>
         </RgfSplitter>
     }
     else
     {
-        if (Node.PrimaryNode != null)
-        {
-            <RgfSplitterContainer Node="Node.PrimaryNode" IsResizable="false" />
-        }
-        else if (Node.SecondaryNode != null)
-        {
-            <RgfSplitterContainer Node="Node.SecondaryNode" IsResizable="false" />
-        }
-        else
-        {
-            @Node.Content
-        }
+        @Node.Content
     }
 }
 
@@ -36,7 +25,4 @@
 
     [Parameter]
     public bool IsResizable { get; set; } = false;
-
-    [Parameter]
-    public RgfSplitterNode? Node { get; set; }
 }

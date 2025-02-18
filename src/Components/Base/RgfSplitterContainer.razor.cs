@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using Recrovit.RecroGridFramework.Client.Blazor.Parameters;
+using Recrovit.RecroGridFramework.Client.Events;
 
 namespace Recrovit.RecroGridFramework.Client.Blazor.UI.Components.Base;
 
@@ -16,7 +18,7 @@ public class RgfSplitterNode
 {
     private static int _nextId = 1;
 
-    public int Id { get; set; }
+    public int Id { get; private set; }
 
     public RgfSplitterNode? Parent { get; private set; }
 
@@ -28,14 +30,21 @@ public class RgfSplitterNode
 
     public RgfSplitterNode? SecondaryNode { get; private set; }
 
+    public bool IsDeleted { get; private set; }
 
-    public RgfSplitterNode(RenderFragment content, RgfSplitterNode? parent = null)
+    internal RgfSplitterNode(RgfSplitterNode? parent = null)
     {
         Id = _nextId++;
-        Content = content;
         Parent = parent;
         Direction = RgfSplitterDirection.None;
     }
+
+    internal RgfSplitterNode(RenderFragment content, RgfSplitterNode? parent = null) : this(parent)
+    {
+        Content = content;
+    }
+
+    internal static RgfSplitterNode CreateRoot(RenderFragment? content = null) => new RgfSplitterNode(content ?? ((b) => { }));
 
     public RgfSplitterNode Split(RenderFragment newContent, RgfSplitterDirection splitDirection = RgfSplitterDirection.Right)
     {
@@ -64,74 +73,152 @@ public class RgfSplitterNode
             throw new InvalidOperationException("Invalid direction");
         }
 
-        Direction = splitDirection;
+        var newSplitter = new RgfSplitterNode(Parent)
+        {
+            Direction = splitDirection
+        };
+
+        if (Parent?.PrimaryNode == this)
+        {
+            Parent.PrimaryNode = newSplitter;
+        }
+        else if (Parent?.SecondaryNode == this)
+        {
+            Parent.SecondaryNode = newSplitter;
+        }
+
+        Parent = newSplitter;
         if (splitDirection == RgfSplitterDirection.Right || splitDirection == RgfSplitterDirection.Bottom)
         {
-            if (Content != null)
-            {
-                PrimaryNode = new RgfSplitterNode(Content, this);
-                (PrimaryNode.Id, Id) = (Id, PrimaryNode.Id);
-                Content = null;
-            }
-            SecondaryNode = new RgfSplitterNode(newContent, this);
-            return SecondaryNode;
+            newSplitter.PrimaryNode = this;
+            newSplitter.SecondaryNode = new RgfSplitterNode(newContent, newSplitter);
+            return newSplitter.SecondaryNode;
         }
 
-        if (Content != null)
-        {
-            SecondaryNode = new RgfSplitterNode(Content, this);
-            (SecondaryNode.Id, Id) = (Id, SecondaryNode.Id);
-            Content = null;
-        }
-        PrimaryNode = new RgfSplitterNode(newContent, this);
-        return PrimaryNode;
+        newSplitter.SecondaryNode = this;
+        newSplitter.PrimaryNode = new RgfSplitterNode(newContent, newSplitter);
+        return newSplitter.PrimaryNode;
     }
 
-    public void Remove(int? baseNodeId)
+    public bool Remove(ILogger logger, RgfSplitterNode? initialNode)
     {
-        if (baseNodeId != null)
+        //keep the node if it is the initial node
+        if (Id == initialNode?.Id)
         {
-            var node = this.FindNode((int)baseNodeId);
-            if (node == this)
+            logger.LogDebug("Id {Id} was not removed. Keeping initial.", Id);
+            return false;
+        }
+
+        // during splitting, the initial always moves down
+        if (initialNode == null || FindNode(initialNode?.Id) == null)
+        {
+            if (Parent == null)
             {
-                return;
+                logger.LogDebug("Removed Root Id: {Id}", Id);
+                IsDeleted = true;
+                return true;
             }
 
-            if (node != null)
+            logger.LogDebug("Removed Id: {Id}", Id);
+            IsDeleted = true;
+
+            if (Parent.PrimaryNode == this)
             {
-                Id = node.Id;
-                Content = node.Content;
-                Direction = node.Direction;
-                PrimaryNode = node.PrimaryNode;
-                SecondaryNode = node.SecondaryNode;
-                return;
+                Parent.PrimaryNode = null;
             }
+            else
+            {
+                if (Parent.SecondaryNode != this) throw new InvalidOperationException("Hierarchy error 1");
+                Parent.SecondaryNode = null;
+            }
+            Parent.OptimizeHierarchy(logger, initialNode);
+            return true;
+        }
+
+        while (initialNode!.Parent != this)
+        {
+            if (initialNode.Parent == null) throw new InvalidOperationException("Hierarchy error 2");
+            initialNode.Parent.Remove(logger, initialNode);
         }
 
         if (Parent == null)
         {
-            Content = null;
-            PrimaryNode = null;
-            SecondaryNode = null;
-            return;
+            //Replace root node with initial node
+            initialNode.Parent = null;
+            logger.LogDebug("Replace Root with Id: {Id}", initialNode.Id);
+            IsDeleted = true;
+            return true;
         }
 
         if (Parent.PrimaryNode == this)
         {
-            Parent.PrimaryNode = null;
+            Parent.PrimaryNode = initialNode;
         }
-        else if (Parent.SecondaryNode == this)
+        else
         {
-            Parent.SecondaryNode = null;
+            if (Parent.SecondaryNode != this) throw new InvalidOperationException("Hierarchy error 3");
+            Parent.SecondaryNode = initialNode;
+        }
+        initialNode.Parent = Parent;
+        logger.LogDebug("Removed T Id: {Id}", Id);
+        IsDeleted = true;
+        Parent.OptimizeHierarchy(logger, initialNode);
+        return true;
+    }
+
+    private void OptimizeHierarchy(ILogger logger, RgfSplitterNode? initialNode)
+    {
+        if (PrimaryNode != null && SecondaryNode != null)
+        {
+            return;
         }
 
-        if (Parent.PrimaryNode == null && Parent.SecondaryNode == null)
+        if (PrimaryNode == null && SecondaryNode == null)
         {
-            Parent.Remove(baseNodeId);
+            if (Content == null)
+            {
+                Remove(logger, initialNode);
+            }
+            Parent?.OptimizeHierarchy(logger, initialNode);
+            return;
+        }
+
+        if (Parent == null)
+        {
+            if (PrimaryNode?.IsDeleted == false)
+            {
+                PrimaryNode.Parent = null;
+                IsDeleted = true;
+                logger.LogDebug("Optimize no parent. Root: {Id}", PrimaryNode.Id);
+            }
+            else if (SecondaryNode!.IsDeleted == false)
+            {
+                SecondaryNode.Parent = null;
+                IsDeleted = true;
+                logger.LogDebug("Optimize no parent. Root: {Id}", SecondaryNode.Id);
+            }
+        }
+        else
+        {
+            if (Parent.PrimaryNode == this)
+            {
+                Parent.PrimaryNode = PrimaryNode ?? SecondaryNode ?? throw new InvalidOperationException("Hierarchy error OP1");
+                Parent.PrimaryNode.Parent = Parent;
+            }
+            else
+            {
+                if (Parent.SecondaryNode != this) throw new InvalidOperationException("Hierarchy error OP2");
+                Parent.SecondaryNode = PrimaryNode ?? SecondaryNode ?? throw new InvalidOperationException("Hierarchy error OP3");
+                Parent.SecondaryNode.Parent = Parent;
+            }
+
+            logger.LogDebug("Removed O Id: {Id}", Id);
+            IsDeleted = true;
+            Parent?.OptimizeHierarchy(logger, initialNode);
         }
     }
 
-    public RgfSplitterNode? FindNode(int id) => Id == id ? this : PrimaryNode?.FindNode(id) ?? SecondaryNode?.FindNode(id);
+    public RgfSplitterNode? FindNode(int? id) => id == null ? null : id == Id ? this : PrimaryNode?.FindNode(id) ?? SecondaryNode?.FindNode(id);
 }
 
 public partial class RgfSplitterContainer
@@ -139,74 +226,117 @@ public partial class RgfSplitterContainer
     [Inject]
     private ILogger<RgfSplitterContainer> _logger { get; set; } = null!;
 
-    [CascadingParameter]
-    public RgfSplitterNode? RootNode { get; set; }
+    [Parameter]
+    public RgfSplitterContainer? ParentContainer { get; set; }
 
-    public int? BaseNodeId;
+    [Parameter]
+    public RgfSplitterNode? Node { get; set; }
+
+    internal int Level { get; set; } = 0;
+
+    //[CascadingParameter]
+    internal RgfSplitterNode? InitialNode { get; set; }
+
+    protected List<RgfSplitterNode> DisplayedNodes { get; set; } = [];
+
+    private RgfSplitterNode? GetRoot(RgfSplitterNode? node) => node?.Parent == null ? node : GetRoot(node.Parent);
+
+    private RgfSplitterNode? FindNode(int id) => DisplayedNodes.FirstOrDefault(n => n.Id == id);
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
 
-        if (InitialContent != null)
+        if (ParentContainer != null)
         {
-            var node = RootNode == null || BaseNodeId == null ? null : RootNode.FindNode((int)BaseNodeId);
-            if (node != null)
+            Level = ParentContainer.Level + 1;
+            InitialNode = ParentContainer.InitialNode;
+        }
+        else if (InitialContent != null)
+        {
+            if (InitialNode?.IsDeleted != false)
             {
-                node.Content = InitialContent;
+                InitialNode = RgfSplitterNode.CreateRoot(InitialContent);
+                DisplayedNodes.Add(InitialNode);
+                _logger.LogDebug("Init Root Id:{Id}", InitialNode.Id);
             }
             else
             {
-                Node = RootNode = new RgfSplitterNode(InitialContent);
-                BaseNodeId = Node.Id;
+                InitialNode.Content = InitialContent;
+                _logger.LogDebug("Initial content set: {id}", InitialNode.Id);
             }
+            Node = GetRoot(InitialNode);
         }
     }
 
-    public RgfSplitterNode? CreateNode(RenderFragment content, int? parentId, RgfSplitterDirection direction = RgfSplitterDirection.Right)
+    public bool IsNodeValid(int id) => FindNode(id)?.IsDeleted == false;
+
+    public int? CreateNode(RenderFragment content, RgfSplitterDirection direction, int? parentId = null)
     {
-        if (RootNode == null)
+        RgfSplitterNode node;
+        var root = GetRoot(InitialNode);
+        if (root == null)
         {
-            Node = RootNode = new RgfSplitterNode(content);
-            StateHasChanged();
-            return Node;
+            node = InitialNode = new RgfSplitterNode(content);
+        }
+        else
+        {
+            var parent = parentId == null || parentId == 0 ? root : FindNode((int)parentId);
+            if (parent == null)
+            {
+                _logger.LogError("Parent node ({Id}) not found", parentId);
+                return null;
+            }
+            node = parent.Split(content, direction);
         }
 
-        var parent = parentId == null || parentId == 0 ? RootNode : RootNode.FindNode((int)parentId);
-        if (parent != null)
-        {
-            StateHasChanged();
-            return parent.Split(content, direction);
-        }
-
-        _logger.LogError("Parent node not found");
-        return null;
+        DisplayedNodes.Add(node);
+        Node = GetRoot(node);
+        _logger.LogDebug("Node created. Id: {Id}, Parent: {ParentId}, Level: {Level}", node.Id, node.Parent?.Id, Level);
+        StateHasChanged();
+        return node.Id;
     }
 
-    public void RemoveNode(int id)
+    public int? CreateNode(RgfDialogParameters dialogParameters, RgfSplitterDirection direction, int? parentId = null)
     {
-        if (RootNode == null)
+        dialogParameters.IsInline = true;
+        RenderFragment content = (builder) =>
         {
-            return;
-        }
+            int sequence = 0;
+            builder.OpenComponent(sequence++, typeof(DialogComponent));
+            builder.AddAttribute(sequence++, nameof(DialogComponent.DialogParameters), dialogParameters);
+            builder.CloseComponent();
+        };
+        var nodeId = CreateNode(content, direction, parentId);
+        var self = this;
+        dialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Destroy, (args) =>
+        {
+            if (nodeId != null) RemoveNode((int)nodeId);
+            dialogParameters.EventDispatcher.Unsubscribe(self);
+        }, self);
+        return nodeId;
+    }
 
-        var node = RootNode.Id == id ? RootNode : RootNode.FindNode(id);
+    public bool RemoveNode(int id)
+    {
+        var node = FindNode(id);
         if (node == null)
         {
-            _logger.LogError("Node not found");
-            return;
+            _logger.LogError("Node {Id} not found", id);
+            return false;
         }
 
-        if (node != null)
+        bool result = node.Remove(_logger, InitialContent == null ? null : InitialNode);
+        if (result)
         {
-            node.Remove(BaseNodeId);
+            DisplayedNodes.Remove(node);
+            Node = GetRoot(DisplayedNodes.FirstOrDefault());
+            if (node == InitialNode)
+            {
+                InitialNode = Node;
+            }
+            StateHasChanged();
         }
-
-        if (RootNode.Content == null && RootNode.PrimaryNode == null && RootNode.SecondaryNode == null)
-        {
-            RootNode = Node = null;
-            BaseNodeId = null;
-        }
-        StateHasChanged();
+        return result;
     }
 }

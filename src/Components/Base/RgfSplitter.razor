@@ -1,9 +1,9 @@
 ﻿<div @ref="_elementReference" @attributes="_attributes">
-    <div class="rgf-splitter-primary-panel">
+    <div class="rgf-splitter-flex-1">
         @PrimaryPanel
     </div>
-    <div class="rgf-splitter"></div>
-    <div class="rgf-splitter-secondary-panel">
+    <div class="rgf-splitter" data-splitter-disabled="@(IsDisabledSplitter ? "true" : null)"></div>
+    <div class="rgf-splitter-flex-2">
         @SecondaryPanel
     </div>
 </div>
@@ -11,11 +11,11 @@
 @inherits RgfBaseComponent
 @code {
 
-    [Parameter, EditorRequired]
-    public RenderFragment PrimaryPanel { get; set; } = null!;
+    [Parameter]
+    public RenderFragment? PrimaryPanel { get; set; }
 
-    [Parameter, EditorRequired]
-    public RenderFragment SecondaryPanel { get; set; } = null!;
+    [Parameter]
+    public RenderFragment? SecondaryPanel { get; set; }
 
     [Parameter]
     public bool IsVertical { get; set; } = false;
@@ -28,10 +28,18 @@
 
     protected override void OnParametersSet()
     {
-        _baseCssClass = "rgf-splitter-container " + (IsVertical ? "vertical" : "horizontal");
-        if (!IsResizable)
+        if (PrimaryPanel != null && SecondaryPanel != null)
         {
-            _baseCssClass += " w-100 h-100";
+            _baseCssClass = "rgf-splitter-wrapper " + (IsVertical ? "vertical" : "horizontal");
+            if (!IsResizable)
+            {
+                _baseCssClass += " w-100 h-100";
+            }
+        }
+        else
+        {
+            _baseCssClass = string.Empty;
+            IsDisabledSplitter = true;
         }
 
         base.OnParametersSet();

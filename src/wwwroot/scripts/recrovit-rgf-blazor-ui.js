@@ -262,13 +262,11 @@ Blazor.UI = {
     },
     Splitter: {
         initialize: function (container) {
-            var $c = $(container),
-                $s = $c.children('.rgf-splitter');
+            var $sp = $(container).children('.rgf-splitter');
+            $sp.off('mousedown.rgfSplitter');
+            if ($sp.prop('data-splitter-disabled')) return;
 
-            $s.off('mousedown.rgfSplitter');
-            if ($c.attr('disabled')) return;
-
-            $s.on('mousedown.rgfSplitter', function () {
+            $sp.on('mousedown.rgfSplitter', function () {
                 var $splitter = $(this);
 
                 const isHorizontal = $splitter.parent().hasClass('horizontal');
@@ -326,15 +324,15 @@ Blazor.UI = {
             if ($panel.length == 0) {
                 return;
             }
-            var $container = $panel?.children('.rgf-splitter-container');
+            var $container = $panel?.children('.rgf-splitter-wrapper');
             if ($container.length > 0) {
                 if (horizontal && $container.hasClass('horizontal') ||
                     !horizontal && $container.hasClass('vertical')) {
-                    $container.children('div.rgf-splitter-secondary-panel').css('flex', '');
+                    $container.children('div.rgf-splitter-flex-2').css('flex', '');
                     return;
                 }
-                BlazorSplitter.clearSiblingFlex($container.children('div.rgf-splitter-primary-panel'), horizontal);
-                BlazorSplitter.clearSiblingFlex($container.children('div.rgf-splitter-secondary-panel'), horizontal);
+                BlazorSplitter.clearSiblingFlex($container.children('div.rgf-splitter-flex-1'), horizontal);
+                BlazorSplitter.clearSiblingFlex($container.children('div.rgf-splitter-flex-2'), horizontal);
             }
         },
         resizable: function (container) {
@@ -343,7 +341,7 @@ Blazor.UI = {
             }
             $(container).resizable({
                 resize: function (event, ui) {
-                    $(this).find('div.rgf-splitter-primary-panel, div.rgf-splitter-secondary-panel').css('flex', '');
+                    $(this).find('div.rgf-splitter-flex-1, div.rgf-splitter-flex-2').css('flex', '');
                 }
             });
         },
