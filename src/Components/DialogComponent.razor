@@ -150,6 +150,8 @@
         {
             await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.initialize", _dialogId, DialogParameters.Resizable, DialogParameters.UniqueName, _focusId, DialogParameters.IsInline);
         }
+        var eventArg = new RgfEventArgs<RgfDialogEventArgs>(this, RgfDialogEventArgs.CreateAfterRenderEvent(firstRender));
+        await DialogParameters.EventDispatcher.DispatchEventAsync(eventArg.Args.EventKind, eventArg);
     }
 
     public override ValueTask DisposeAsync()
