@@ -22,7 +22,7 @@
         var selected = TreeComponent.SelectedItems.ContainsKey(Manager.ListHandler.GetAbsoluteRowIndex(Node.RowData)) ? "table-primary" : null;
         <RgfHtml TagName="div"
                  CssClass="@("data-node table d-inline tree-tooltip".EnsureContains(selected, ' ').EnsureContains(attributes?.Get<string>("class"), ' '))" AdditionalAttributes="@(new(){ {"rgf-bs-tree",""} })"
-                 TooltipOptions="@(new RgfTooltipOptions(Node.TooltipText) { CustomClass = "rgf-tooltip-600"})"
+                 TooltipOptions="@(new RgfTooltipOptions(Node.TooltipText) { CustomClass = "rgf-tooltip-600", DelayShow = 1500 } )"
                  OnClick="(arg) => TreeComponent.SelectNodeAsync(Node)"
                  OnDblClick="(arg) => TreeComponent.DispatchToolbarReadEventAsync(Node)">
             <RgfHtml TagName="div"

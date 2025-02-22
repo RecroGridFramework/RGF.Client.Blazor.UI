@@ -82,7 +82,10 @@ Blazor.UI = {
                     placement: options.placement || 'top',
                     trigger: options.trigger || 'hover',
                     html: options.allowHtml,
-                    delay: { show: 500 }
+                    delay: {
+                        show: options.delayShow || 500,
+                        hide: options.delayHide || 100
+                    }
                 });
             }
             else {
