@@ -17,6 +17,53 @@ Blazor.UI = {
             }
             return false;
         },
+        ensureVisible: async function (selector, setFocus = false, closestSelector = null, duration = 500, offset = 20) {
+            try {
+                var element = $(selector);
+                if (element.length && element.is(':visible')) {
+
+                    if (closestSelector) {
+                        var e2 = element.closest(closestSelector);
+                        if (e2.length) {
+                            element = e2;
+                        }
+                    }
+
+                    var windowTop = $(window).scrollTop(),
+                        windowHeight = $(window).height(),
+                        windowBottom = windowTop + windowHeight,
+                        elementTop = element.offset().top,
+                        elementBottom = elementTop + element.outerHeight(),
+                        elementHeight = element.outerHeight();
+
+                    if (elementTop >= windowTop && elementBottom <= windowBottom) {
+                        if (setFocus) {
+                            element.focus();
+                        }
+                        return true;
+                    }
+
+                    var scrollTo = elementTop - offset;
+                    if (elementBottom > windowBottom && elementHeight < windowHeight) {
+                        scrollTo = elementBottom - windowHeight + offset;
+                    }
+
+                    await new Promise((resolve, reject) => {
+                        $('html, body').stop(true, true).animate({ scrollTop: scrollTo }, duration, function () {
+                            if (setFocus) {
+                                element.focus();
+                            }
+                            resolve();
+                        });
+                    });
+                    return true;
+                }
+                return false;
+            }
+            catch (error) {
+                return false;
+            }
+        },
         tooltip: function (element, options) {
             var $element = $(element);
             if ($element.length !== 1) return null;
@@ -360,5 +407,6 @@ Blazor.UI = {
     }
 };
 
+const BlazorBase = Blazor.UI.Base;
 const BlazorGrids = Blazor.UI.Grid;
 const BlazorSplitter = Blazor.UI.Splitter;

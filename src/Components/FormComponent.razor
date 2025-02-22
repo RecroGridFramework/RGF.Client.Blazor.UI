@@ -121,7 +121,7 @@
         }
         foreach (var prop in Manager.EntityDesc.Properties.Where(e => e.FormTab == 1 && e.Editable).OrderBy(e => e.FormPos))
         {
-            if (await _jsRuntime.InvokeAsync<bool>(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.setFocus", $"div.rg-property[name='{prop.ClientName}'] .rg-cru"))
+            if (await _jsRuntime.InvokeAsync<bool>(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.ensureVisible", $"div.rg-property[name='{prop.ClientName}'] .rg-cru", true))
             {
                 break;
             }
