@@ -24,7 +24,9 @@
     public bool IsResizable { get; set; } = false;
 
     [Parameter]
-    public bool IsDisabledSplitter { get; set; } = false;
+    public bool DisabledSplitter { get; set; }
+
+    public bool IsDisabledSplitter => DisabledSplitter || PrimaryPanel == null || SecondaryPanel == null;
 
     protected override void OnParametersSet()
     {
@@ -39,7 +41,6 @@
         else
         {
             _baseCssClass = string.Empty;
-            IsDisabledSplitter = true;
         }
 
         base.OnParametersSet();
