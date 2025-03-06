@@ -81,10 +81,10 @@ Blazor.UI = {
                     customClass: options.customClass || 'rgf-tooltip-400',
                     placement: options.placement || 'top',
                     trigger: options.trigger || 'hover',
-                    html: options.allowHtml,
+                    html: options.allowHtml ?? false,
                     delay: {
-                        show: options.delayShow || 500,
-                        hide: options.delayHide || 100
+                        show: options.delayShow ?? 500,
+                        hide: options.delayHide ?? 100
                     }
                 });
             }
