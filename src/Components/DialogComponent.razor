@@ -1,6 +1,4 @@
-﻿@using Recrovit.RecroGridFramework.Client.Events
-
-@if (!DialogParameters.IsInline)
+﻿@if (!DialogParameters.IsInline)
 {
     <div class="modal-backdrop show"></div>
 }
@@ -53,6 +51,7 @@
 </div>
 
 @inherits RgfBaseComponent
+@inject ILogger<DialogComponent> _logger
 @code {
 
     [Parameter, EditorRequired]
@@ -145,7 +144,10 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        _logger.LogDebug("OnAfterRender | FirstRender:{firstRender}, {DialogType}:{UniqueName}, {Title}", firstRender, DialogParameters.DialogType, DialogParameters.UniqueName, DialogParameters.Title);
+
         await base.OnAfterRenderAsync(firstRender);
+
         if (firstRender)
         {
             await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Dialog.initialize", _dialogId, DialogParameters.Resizable, DialogParameters.UniqueName, _focusId, DialogParameters.IsInline);
