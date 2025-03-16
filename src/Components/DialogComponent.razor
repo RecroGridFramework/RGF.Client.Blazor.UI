@@ -112,6 +112,7 @@
 
         DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Initialized, this);
 
+        KeysToPrevent = ["Escape"];
         OnKeyDown = (args) => args.Code == "Escape" ? OnClose() : Task.CompletedTask;
     }
 

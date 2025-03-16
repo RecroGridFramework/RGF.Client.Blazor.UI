@@ -93,10 +93,14 @@ Blazor.UI = {
             }
             return tooltipInstance;
         },
-        registerKeydown: function (dotNetObjRef, selector) {
+        registerKeydown: function (dotNetObjRef, selector, keysToPrevent) {
             if (selector) {
                 var targetElement = $(selector);
                 targetElement.on('keydown.RgfUI', function (e) {
+                    if (keysToPrevent && keysToPrevent.includes(e.key)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
                     var keyboardEventArgs = {
                         key: e.key,
                         code: e.code,

@@ -69,6 +69,9 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
     public string? KeyboardEventTargetSelector { get; set; }
 
     [Parameter]
+    public string[]? KeysToPrevent { get; set; }
+
+    [Parameter]
     public Func<KeyboardEventArgs, Task>? OnKeyDown { get; set; }
 
     [Parameter]
@@ -87,6 +90,7 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
     private DotNetObjectReference<RgfBaseComponent>? _selfRef;
 
     private string? _currentKeyboardEventTargetSelector;
+    private string[]? _currentKeysToPrevent;
     private Func<KeyboardEventArgs, Task>? _currentOnKeyDown;
 
     public static string GetNextId(string format = "rgf-id-{0}") => RgfComponentWrapper.GetNextId(format);
@@ -162,7 +166,7 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
     {
         await base.OnParametersSetAsync();
 
-        if (_currentOnKeyDown != OnKeyDown || _currentKeyboardEventTargetSelector != KeyboardEventTargetSelector)
+        if (ShouldUpdateKeydownHandler)
         {
             await UnregisterKeydownHandler();
             if (OnKeyDown != null && string.IsNullOrEmpty(KeyboardEventTargetSelector) && Id == null)
@@ -171,6 +175,11 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
             }
         }
     }
+
+    private bool ShouldUpdateKeydownHandler =>
+        _currentOnKeyDown != OnKeyDown ||
+        _currentKeyboardEventTargetSelector != KeyboardEventTargetSelector ||
+        (_currentKeysToPrevent?.SequenceEqual(KeysToPrevent ?? Array.Empty<string>()) ?? KeysToPrevent != null);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -181,17 +190,17 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
             await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.tooltip", _elementReference, TooltipOptions);
         }
 
-        if (_currentOnKeyDown != OnKeyDown || _currentKeyboardEventTargetSelector != KeyboardEventTargetSelector)
+        if (ShouldUpdateKeydownHandler)
         {
             if (OnKeyDown != null)
             {
-                _selfRef?.Dispose();
-                _selfRef = DotNetObjectReference.Create(this);
+                _selfRef ??= DotNetObjectReference.Create(this);
                 var selector = KeyboardEventTargetSelector ?? $"#{Id}";
-                await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.registerKeydown", _selfRef, selector);
+                await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.registerKeydown", _selfRef, selector, KeysToPrevent);
             }
             _currentOnKeyDown = OnKeyDown;
             _currentKeyboardEventTargetSelector = KeyboardEventTargetSelector;
+            _currentKeysToPrevent = KeysToPrevent;
         }
     }
 
@@ -225,7 +234,7 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
     {
         if (_elementReference != null && TooltipOptions != null)
         {
-            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.tooltip", _elementReference, TooltipOptions);
+            await _jsRuntime.InvokeVoidAsync(RGFClientBlazorUIConfiguration.JsBlazorUiNamespace + ".Base.tooltip", _elementReference);
         }
         if (_selfRef != null)
         {
