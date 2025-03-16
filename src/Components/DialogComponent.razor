@@ -3,8 +3,8 @@
     <div class="modal-backdrop show"></div>
 }
 <div id="@_dialogId" class="@(DialogParameters.IsInline ? null : "modal fade show")" tabindex="-1" role="dialog" style="display:block">
-    <div class="@(DialogParameters.IsInline ? null: "modal-dialog modal-dialog-scrollable")" @onkeydown="@OnKeyDown">
-        <div @attributes="_attributes">
+    <div class="@(DialogParameters.IsInline ? null: "modal-dialog modal-dialog-scrollable")">
+        <div @attributes="Attributes">
             @if (DialogParameters.NoHeader != true)
             {
                 <div class="@($"modal-header {ThemeColor}")">
@@ -111,6 +111,8 @@
         DialogParameters.EventDispatcher.Subscribe(RgfDialogEventKind.Refresh, (arg) => StateHasChanged(), true, this);
 
         DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Initialized, this);
+
+        OnKeyDown = (args) => args.Code == "Escape" ? OnClose() : Task.CompletedTask;
     }
 
     protected override void OnParametersSet()
@@ -139,8 +141,6 @@
     }
 
     private Task OnClose() => DialogParameters.EventDispatcher.RaiseEventAsync(RgfDialogEventKind.Close, this);
-
-    private Task OnKeyDown(KeyboardEventArgs args) => args.Code == "Escape" ? OnClose() : Task.CompletedTask;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

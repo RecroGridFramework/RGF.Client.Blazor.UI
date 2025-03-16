@@ -1,5 +1,5 @@
 ﻿/*!
-* recrovit-rgf-blazor-ui.js v1.9.0
+* recrovit-rgf-blazor-ui.js v1.10.0
 */
 
 window.Recrovit = window.Recrovit || {};
@@ -92,6 +92,31 @@ Blazor.UI = {
                 tooltipInstance.setContent({ '.tooltip-inner': options.title });
             }
             return tooltipInstance;
+        },
+        registerKeydown: function (dotNetObjRef, selector) {
+            if (selector) {
+                var targetElement = $(selector);
+                targetElement.on('keydown.RgfUI', function (e) {
+                    var keyboardEventArgs = {
+                        key: e.key,
+                        code: e.code,
+                        location: e.location,
+                        repeat: e.repeat,
+                        ctrlKey: e.ctrlKey,
+                        shiftKey: e.shiftKey,
+                        altKey: e.altKey,
+                        metaKey: e.metaKey,
+                        keyCode: e.keyCode,
+                        type: e.type
+                    };
+                    dotNetObjRef.invokeMethodAsync('OnKeyDownJsCallback', keyboardEventArgs);
+                });
+            }
+        },
+        unregisterKeydown: function (selector) {
+            if (selector) {
+                $(selector).off('keydown.RgfUI');
+            }
         }
     },
     Dialog: {
