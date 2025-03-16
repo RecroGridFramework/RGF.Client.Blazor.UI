@@ -79,7 +79,7 @@ public class RgfBaseComponent : ComponentBase, IAsyncDisposable
 
     protected string _baseCssClass { get; set; } = string.Empty;
 
-    protected Dictionary<string, object> _attributes { get; } = [];
+    private Dictionary<string, object> _attributes { get; } = [];
 
     protected IReadOnlyDictionary<string, object>? Attributes => _attributes.Count > 0 ? _attributes : null;
 

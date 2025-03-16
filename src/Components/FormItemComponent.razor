@@ -177,9 +177,6 @@
     [Parameter, EditorRequired]
     public RgfFormItemParameters FormItemParameters { get; set; } = null!;
 
-    [CascadingParameter]
-    public EditContext CurrentEditContext { get; set; } = null!;
-
     protected RgfFormComponent BaseFormComponent => FormItemParameters.BaseFormComponent;
     protected FormComponent FormComponent => (FormComponent)FormItemParameters.BaseFormComponent.FormComponent;
     protected RgfForm.Property Property => FormItemParameters.Property;
