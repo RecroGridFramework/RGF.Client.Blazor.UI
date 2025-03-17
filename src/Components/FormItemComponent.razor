@@ -183,7 +183,7 @@
     protected RgfDynamicData ItemData => FormItemParameters.ItemData;
 
     protected RgfProperty PropertyDesc => Property.PropertyDesc;
-    private string? Tooltip => BaseFormComponent.PropertyTooltips.GetTooltip(Property.Id);
+    private string? Tooltip => BaseFormComponent.PropertyTooltips.GetTooltip(Property.Id, ItemData.Value?.ToString());
     private RenderFragment? _embeddedGrid;
 
     protected string Id { get; set; } = RgfBaseComponent.GetNextId();
