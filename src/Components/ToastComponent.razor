@@ -8,6 +8,7 @@
             _toasts.Remove(toast);
             continue;
         }
+        var footer = toast.MarkupFooter;
         <div @key="toast" class="toast show @GetToastClass(toast.ToastType)" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 250px;">
             <div class="toast-header">
                 <strong class="me-auto">@toast.MarkupHeader</strong>
@@ -21,6 +22,12 @@
                     <SpinnerComponent ContainerClass="d-inline ps-2" Style="width: 1rem; height: 1rem;" />
                 }
             </div>
+            @if (!string.IsNullOrWhiteSpace(footer.Value))
+            {
+                <div class="toast-footer">
+                    @footer
+                </div>
+            }
         </div>
     }
 </div>
